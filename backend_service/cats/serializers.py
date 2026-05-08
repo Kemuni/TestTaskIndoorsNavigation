@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib.auth import get_user_model
 from rest_framework import serializers, pagination
 
@@ -29,7 +31,7 @@ class ShortCatSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cat
-        fields = ('id', 'name', 'breed', 'gender', 'color')
+        fields = ('id', 'name', 'breed', 'gender', 'color', 'age', 'age_months')
 
 
 class CatReadSerializer(serializers.ModelSerializer):
@@ -43,6 +45,7 @@ class CatReadSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'birthday', 'owner', 'gender', 'color', 'breed', 'current_weight', 'birth_weight',
             'is_sterilized', 'description', 'mother', 'father', 'status', 'created_at', 'updated_at',
+            'age', 'age_months',
         )
         depth = 1
 
@@ -75,13 +78,19 @@ class CatWriteSerializer(CatReadSerializer):
         allow_null=False, required=True,
     )
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    Cat.birth_weight
 
     class Meta:
         model = Cat
         fields = (
             'id', 'name', 'birthday', 'owner', 'gender', 'color', 'breed', 'breed_id', 'current_weight', 'birth_weight',
             'is_sterilized', 'description', 'mother', 'mother_id', 'father', 'father_id', 'status',
-            'created_at', 'updated_at',
+            'created_at', 'updated_at', 'age', 'age_months',
         )
         read_only_fields = ('id',)
+
+    @staticmethod
+    def validate_birthday(value):
+        if value > date.today():
+            raise serializers.ValidationError("birthday cannot be in the future")
+
+        return value

@@ -1,9 +1,12 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 
+from cats.filters import CatFilterSet
 from cats.models import Breed, Cat
 from cats.serializers import (
     BreedSerializer,
@@ -21,6 +24,12 @@ from core.swagger_utils import get_default_schema_responses
 class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
     """ ViewSet для работы с породами кошек """
     SCHEMA_TAG = 'Breed'
+
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['name', 'description']
+    ordering_fields = ['name']
+    ordering = ['name']
+
     queryset = Breed.objects.all()
     serializer_class = BreedSerializer
     permission_classes = [IsAuthenticated]
@@ -150,6 +159,14 @@ class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
 class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
     """ ViewSet для работы с объявлениями кошек """
     SCHEMA_TAG = 'Cat'
+
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    # filter_backends = [SearchFilter, OrderingFilter]
+    filterset_class = CatFilterSet
+    search_fields = ['name', 'color', 'description', 'breed__name']
+    ordering_fields = ['current_weight', 'birthday', 'status']
+    ordering = ['-created_at']
+
     queryset = Cat.objects.select_related('breed', 'owner', 'mother', 'father').all()
     permission_classes = [IsAuthenticated]
 

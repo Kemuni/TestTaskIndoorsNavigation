@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -77,6 +79,19 @@ class Cat(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def age_months(self) -> int:
+        """ Считаем и возвращаем возраст кошки в месяцах """
+        today = date.today()
+        years_delta = today.year - self.birthday.year
+        months_delta = today.month - self.birthday.month
+        return years_delta * 12 + months_delta
+
+    @property
+    def age(self) -> int:
+        """ Считаем и возвращаем возраст кошки в целых годах """
+        return self.age_months // 12
+
     def __str__(self):
         return f'{self.name} (ID={self.id})'
 
@@ -84,4 +99,5 @@ class Cat(models.Model):
         indexes = [
             models.Index(fields=['breed', 'gender']),
             models.Index(fields=['status']),
+            models.Index(fields=['birthday']),
         ]
