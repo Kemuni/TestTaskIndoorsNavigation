@@ -45,7 +45,7 @@ class CatReadSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'birthday', 'owner', 'gender', 'color', 'breed', 'current_weight', 'birth_weight',
             'is_sterilized', 'description', 'mother', 'father', 'status', 'created_at', 'updated_at',
-            'age', 'age_months',
+            'age', 'age_months', 'price',
         )
         depth = 1
 
@@ -84,7 +84,7 @@ class CatWriteSerializer(CatReadSerializer):
         fields = (
             'id', 'name', 'birthday', 'owner', 'gender', 'color', 'breed', 'breed_id', 'current_weight', 'birth_weight',
             'is_sterilized', 'description', 'mother', 'mother_id', 'father', 'father_id', 'status',
-            'created_at', 'updated_at', 'age', 'age_months',
+            'created_at', 'updated_at', 'age', 'age_months', 'price',
         )
         read_only_fields = ('id',)
 

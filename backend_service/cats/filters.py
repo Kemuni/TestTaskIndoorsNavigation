@@ -1,6 +1,7 @@
 from datetime import date
 
 import django_filters
+from django.db.models import Q
 
 from cats.models import Cat
 
@@ -33,6 +34,19 @@ class CatFilterSet(django_filters.FilterSet):
     current_weight_max = django_filters.NumberFilter(
         field_name='current_weight',
         lookup_expr='lte'
+    )
+
+    is_free = django_filters.BooleanFilter(
+        method='filter_by_is_free',
+        label='Является бесплатным',
+    )
+    price_min = django_filters.NumberFilter(
+        method='filter_by_min_price',
+        label='Минимальная цена (рубли)',
+    )
+    price_max = django_filters.NumberFilter(
+        method='filter_by_max_price',
+        label='Максимальная цена (рубли)',
     )
 
     min_age_months = django_filters.NumberFilter(
@@ -95,9 +109,33 @@ class CatFilterSet(django_filters.FilterSet):
         else:
             return queryset.filter(father__isnull=True)
 
+
+    def filter_by_min_price(self, queryset, _, value):
+        if value is None or value == 0:
+            return queryset
+        return queryset.filter(Q(price__gte=value) & Q(price__isnull=False))
+
+
+    def filter_by_max_price(self, queryset, _, value):
+        if value is None:
+            return queryset
+        if value == 0:
+            return queryset.filter(Q(price=0) | Q(price__isnull=True))
+        return queryset.filter(Q(price__lte=value) & Q(price__isnull=False))
+
+
+    def filter_by_is_free(self, queryset, _, value):
+        if value is None:
+            return queryset
+        if value:
+            return queryset.filter(Q(price=0) | Q(price__isnull=True))
+        else:
+            return queryset.filter(Q(price__gte=0) | Q(price__isnull=False))
+
     class Meta:
         model = Cat
         fields = (
             'gender', 'status', 'is_sterilized', 'breed_id', 'owner_id', 'current_weight_min',
             'current_weight_max', 'min_age_months', 'max_age_months', 'has_mother', 'has_father',
+            'price_min', 'price_max', 'is_free',
         )

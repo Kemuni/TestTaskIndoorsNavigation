@@ -32,6 +32,14 @@ class Cat(models.Model):
 
     id = models.AutoField(primary_key=True)
     name = models.CharField(_('name'), max_length=100)
+    price = models.DecimalField(
+        _('price'),
+        max_digits=15, decimal_places=2,
+        blank=True, null=True,
+        validators=[
+            MinValueValidator(0, _('Price must be greater than 0')),
+        ],
+    )
     birthday = models.DateField(_('birthday'))
     owner = models.ForeignKey('users.User', on_delete=models.PROTECT, related_name='cats', verbose_name=_('owner'))
     gender = models.CharField(_('gender'), max_length=1, choices=Gender)
