@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-xxyc)&migk8ou3s7g#v&fft0gl7y^-n0u_v!-lc3hkkiw8brq4')
 
-DEBUG = os.getenv('DEBUG', False)
+DEBUG = os.getenv('DEBUG', True)
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -43,7 +43,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'users',
+    'cats',
     'drf_spectacular',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -141,6 +143,17 @@ REST_FRAMEWORK = {
     ),
     'EXCEPTION_HANDLER': 'core.exception_handler.exception_handler',
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+    # Настройки фильтров
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+        'rest_framework.filters.SearchFilter',
+    ),
+
+    # Настройки пагинации
+    'DEFAULT_PAGINATION_CLASS': 'core.pagination.PageNumberPagination',
+    'PAGE_SIZE': 100
 }
 
 

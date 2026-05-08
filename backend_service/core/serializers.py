@@ -30,6 +30,7 @@ class BaseResponseSerializer(serializers.Serializer):
     exclude_fields=['data'],
 )
 class ErrorResponseSerializer(serializers.Serializer):
+    """ Сериализатор базового ответа нашего API с ошибкой """
     success = serializers.BooleanField(default=False, help_text="Успешность операции")
     data = serializers.JSONField(required=False, allow_null=True)
     error = ErrorDetailSerializer(required=True, allow_null=False)
