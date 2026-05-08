@@ -548,7 +548,7 @@
     </routine>
     <schema id="208" parent="1" name="main">
       <Current>1</Current>
-      <LastIntrospectionLocalTimestamp>2026-05-07.17:02:05</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2026-05-08.10:23:29</LastIntrospectionLocalTimestamp>
     </schema>
     <argument id="209" parent="16">
       <ArgumentDirection>R</ArgumentDirection>
@@ -1750,460 +1750,616 @@
     <table id="608" parent="208" name="auth_group"/>
     <table id="609" parent="208" name="auth_group_permissions"/>
     <table id="610" parent="208" name="auth_permission"/>
-    <table id="611" parent="208" name="django_admin_log"/>
-    <table id="612" parent="208" name="django_content_type"/>
-    <table id="613" parent="208" name="django_migrations"/>
-    <table id="614" parent="208" name="django_session"/>
-    <table id="615" parent="208" name="sqlite_master">
+    <table id="611" parent="208" name="cats_breed"/>
+    <table id="612" parent="208" name="cats_cat"/>
+    <table id="613" parent="208" name="django_admin_log"/>
+    <table id="614" parent="208" name="django_content_type"/>
+    <table id="615" parent="208" name="django_migrations"/>
+    <table id="616" parent="208" name="django_session"/>
+    <table id="617" parent="208" name="sqlite_master">
       <System>1</System>
     </table>
-    <table id="616" parent="208" name="sqlite_sequence">
+    <table id="618" parent="208" name="sqlite_sequence">
       <System>1</System>
     </table>
-    <table id="617" parent="208" name="users_user"/>
-    <table id="618" parent="208" name="users_user_groups"/>
-    <table id="619" parent="208" name="users_user_user_permissions"/>
-    <column id="620" parent="608" name="id">
+    <table id="619" parent="208" name="users_user"/>
+    <table id="620" parent="208" name="users_user_groups"/>
+    <table id="621" parent="208" name="users_user_user_permissions"/>
+    <column id="622" parent="608" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="621" parent="608" name="name">
+    <column id="623" parent="608" name="name">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(150)|0s</StoredType>
     </column>
-    <index id="622" parent="608" name="sqlite_autoindex_auth_group_1">
+    <index id="624" parent="608" name="sqlite_autoindex_auth_group_1">
       <ColNames>name</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="623" parent="608">
+    <key id="625" parent="608">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="624" parent="608">
+    <key id="626" parent="608">
       <ColNames>name</ColNames>
       <UnderlyingIndexName>sqlite_autoindex_auth_group_1</UnderlyingIndexName>
     </key>
-    <column id="625" parent="609" name="id">
+    <column id="627" parent="609" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="626" parent="609" name="group_id">
+    <column id="628" parent="609" name="group_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="627" parent="609" name="permission_id">
+    <column id="629" parent="609" name="permission_id">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <foreign-key id="628" parent="609">
+    <foreign-key id="630" parent="609">
       <ColNames>group_id</ColNames>
       <Deferrable>1</Deferrable>
       <InitiallyDeferred>1</InitiallyDeferred>
       <RefColNames>id</RefColNames>
       <RefTableName>auth_group</RefTableName>
     </foreign-key>
-    <foreign-key id="629" parent="609">
+    <foreign-key id="631" parent="609">
       <ColNames>permission_id</ColNames>
       <Deferrable>1</Deferrable>
       <InitiallyDeferred>1</InitiallyDeferred>
       <RefColNames>id</RefColNames>
       <RefTableName>auth_permission</RefTableName>
     </foreign-key>
-    <index id="630" parent="609" name="auth_group_permissions_group_id_permission_id_0cd325b0_uniq">
+    <index id="632" parent="609" name="auth_group_permissions_group_id_permission_id_0cd325b0_uniq">
       <ColNames>group_id
 permission_id</ColNames>
       <Unique>1</Unique>
     </index>
-    <index id="631" parent="609" name="auth_group_permissions_group_id_b120cbf9">
+    <index id="633" parent="609" name="auth_group_permissions_group_id_b120cbf9">
       <ColNames>group_id</ColNames>
     </index>
-    <index id="632" parent="609" name="auth_group_permissions_permission_id_84c5c92e">
+    <index id="634" parent="609" name="auth_group_permissions_permission_id_84c5c92e">
       <ColNames>permission_id</ColNames>
     </index>
-    <key id="633" parent="609">
+    <key id="635" parent="609">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="634" parent="610" name="id">
+    <column id="636" parent="610" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="635" parent="610" name="content_type_id">
+    <column id="637" parent="610" name="content_type_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="636" parent="610" name="codename">
+    <column id="638" parent="610" name="codename">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="637" parent="610" name="name">
+    <column id="639" parent="610" name="name">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>varchar(255)|0s</StoredType>
     </column>
-    <foreign-key id="638" parent="610">
+    <foreign-key id="640" parent="610">
       <ColNames>content_type_id</ColNames>
       <Deferrable>1</Deferrable>
       <InitiallyDeferred>1</InitiallyDeferred>
       <RefColNames>id</RefColNames>
       <RefTableName>django_content_type</RefTableName>
     </foreign-key>
-    <index id="639" parent="610" name="auth_permission_content_type_id_codename_01ab375a_uniq">
+    <index id="641" parent="610" name="auth_permission_content_type_id_codename_01ab375a_uniq">
       <ColNames>content_type_id
 codename</ColNames>
       <Unique>1</Unique>
     </index>
-    <index id="640" parent="610" name="auth_permission_content_type_id_2f476e4b">
+    <index id="642" parent="610" name="auth_permission_content_type_id_2f476e4b">
       <ColNames>content_type_id</ColNames>
     </index>
-    <key id="641" parent="610">
+    <key id="643" parent="610">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <check id="642" parent="611">
-      <Predicate>&quot;action_flag&quot; &gt;= 0</Predicate>
-    </check>
-    <column id="643" parent="611" name="id">
+    <column id="644" parent="611" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="644" parent="611" name="object_id">
+    <column id="645" parent="611" name="name">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="646" parent="611" name="description">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>text|0s</StoredType>
+    </column>
+    <key id="647" parent="611">
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <check id="648" parent="612">
+      <Predicate>&quot;birth_weight&quot; &gt;= 0</Predicate>
+    </check>
+    <check id="649" parent="612">
+      <Predicate>&quot;current_weight&quot; &gt;= 0</Predicate>
+    </check>
+    <column id="650" parent="612" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>integer|0s</StoredType>
+    </column>
+    <column id="651" parent="612" name="name">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(100)|0s</StoredType>
+    </column>
+    <column id="652" parent="612" name="birthday">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>date|0s</StoredType>
+    </column>
+    <column id="653" parent="612" name="gender">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(1)|0s</StoredType>
+    </column>
+    <column id="654" parent="612" name="color">
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>varchar(100)|0s</StoredType>
+    </column>
+    <column id="655" parent="612" name="current_weight">
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>integer unsigned|0s</StoredType>
+    </column>
+    <column id="656" parent="612" name="birth_weight">
+      <Position>7</Position>
+      <StoredType>integer unsigned|0s</StoredType>
+    </column>
+    <column id="657" parent="612" name="is_sterilized">
+      <NotNull>1</NotNull>
+      <Position>8</Position>
+      <StoredType>bool|0s</StoredType>
+    </column>
+    <column id="658" parent="612" name="description">
+      <Position>9</Position>
+      <StoredType>text|0s</StoredType>
+    </column>
+    <column id="659" parent="612" name="status">
+      <NotNull>1</NotNull>
+      <Position>10</Position>
+      <StoredType>varchar(20)|0s</StoredType>
+    </column>
+    <column id="660" parent="612" name="created_at">
+      <NotNull>1</NotNull>
+      <Position>11</Position>
+      <StoredType>datetime|0s</StoredType>
+    </column>
+    <column id="661" parent="612" name="updated_at">
+      <NotNull>1</NotNull>
+      <Position>12</Position>
+      <StoredType>datetime|0s</StoredType>
+    </column>
+    <column id="662" parent="612" name="breed_id">
+      <NotNull>1</NotNull>
+      <Position>13</Position>
+      <StoredType>bigint|0s</StoredType>
+    </column>
+    <column id="663" parent="612" name="father_id">
+      <Position>14</Position>
+      <StoredType>integer|0s</StoredType>
+    </column>
+    <column id="664" parent="612" name="mother_id">
+      <Position>15</Position>
+      <StoredType>integer|0s</StoredType>
+    </column>
+    <column id="665" parent="612" name="owner_id">
+      <NotNull>1</NotNull>
+      <Position>16</Position>
+      <StoredType>bigint|0s</StoredType>
+    </column>
+    <foreign-key id="666" parent="612">
+      <ColNames>breed_id</ColNames>
+      <Deferrable>1</Deferrable>
+      <InitiallyDeferred>1</InitiallyDeferred>
+      <RefColNames>id</RefColNames>
+      <RefTableName>cats_breed</RefTableName>
+    </foreign-key>
+    <foreign-key id="667" parent="612">
+      <ColNames>father_id</ColNames>
+      <Deferrable>1</Deferrable>
+      <InitiallyDeferred>1</InitiallyDeferred>
+      <RefColNames>id</RefColNames>
+      <RefTableName>cats_cat</RefTableName>
+    </foreign-key>
+    <foreign-key id="668" parent="612">
+      <ColNames>mother_id</ColNames>
+      <Deferrable>1</Deferrable>
+      <InitiallyDeferred>1</InitiallyDeferred>
+      <RefColNames>id</RefColNames>
+      <RefTableName>cats_cat</RefTableName>
+    </foreign-key>
+    <foreign-key id="669" parent="612">
+      <ColNames>owner_id</ColNames>
+      <Deferrable>1</Deferrable>
+      <InitiallyDeferred>1</InitiallyDeferred>
+      <RefColNames>id</RefColNames>
+      <RefTableName>users_user</RefTableName>
+    </foreign-key>
+    <index id="670" parent="612" name="cats_cat_status_b48d4c_idx">
+      <ColNames>status</ColNames>
+    </index>
+    <index id="671" parent="612" name="cats_cat_breed_i_5b5ea7_idx">
+      <ColNames>breed_id
+gender</ColNames>
+    </index>
+    <index id="672" parent="612" name="cats_cat_breed_id_1189b39b">
+      <ColNames>breed_id</ColNames>
+    </index>
+    <index id="673" parent="612" name="cats_cat_father_id_c67c2410">
+      <ColNames>father_id</ColNames>
+    </index>
+    <index id="674" parent="612" name="cats_cat_mother_id_afae0df1">
+      <ColNames>mother_id</ColNames>
+    </index>
+    <index id="675" parent="612" name="cats_cat_owner_id_1ad8adbe">
+      <ColNames>owner_id</ColNames>
+    </index>
+    <key id="676" parent="612">
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <check id="677" parent="613">
+      <Predicate>&quot;action_flag&quot; &gt;= 0</Predicate>
+    </check>
+    <column id="678" parent="613" name="id">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>integer|0s</StoredType>
+    </column>
+    <column id="679" parent="613" name="object_id">
       <Position>2</Position>
       <StoredType>text|0s</StoredType>
     </column>
-    <column id="645" parent="611" name="object_repr">
+    <column id="680" parent="613" name="object_repr">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>varchar(200)|0s</StoredType>
     </column>
-    <column id="646" parent="611" name="action_flag">
+    <column id="681" parent="613" name="action_flag">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>smallint unsigned|0s</StoredType>
     </column>
-    <column id="647" parent="611" name="change_message">
+    <column id="682" parent="613" name="change_message">
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>text|0s</StoredType>
     </column>
-    <column id="648" parent="611" name="content_type_id">
+    <column id="683" parent="613" name="content_type_id">
       <Position>6</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="649" parent="611" name="user_id">
+    <column id="684" parent="613" name="user_id">
       <NotNull>1</NotNull>
       <Position>7</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="650" parent="611" name="action_time">
+    <column id="685" parent="613" name="action_time">
       <NotNull>1</NotNull>
       <Position>8</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <foreign-key id="651" parent="611">
+    <foreign-key id="686" parent="613">
       <ColNames>content_type_id</ColNames>
       <Deferrable>1</Deferrable>
       <InitiallyDeferred>1</InitiallyDeferred>
       <RefColNames>id</RefColNames>
       <RefTableName>django_content_type</RefTableName>
     </foreign-key>
-    <foreign-key id="652" parent="611">
+    <foreign-key id="687" parent="613">
       <ColNames>user_id</ColNames>
       <Deferrable>1</Deferrable>
       <InitiallyDeferred>1</InitiallyDeferred>
       <RefColNames>id</RefColNames>
       <RefTableName>users_user</RefTableName>
     </foreign-key>
-    <index id="653" parent="611" name="django_admin_log_content_type_id_c4bce8eb">
+    <index id="688" parent="613" name="django_admin_log_content_type_id_c4bce8eb">
       <ColNames>content_type_id</ColNames>
     </index>
-    <index id="654" parent="611" name="django_admin_log_user_id_c564eba6">
+    <index id="689" parent="613" name="django_admin_log_user_id_c564eba6">
       <ColNames>user_id</ColNames>
     </index>
-    <key id="655" parent="611">
+    <key id="690" parent="613">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="656" parent="612" name="id">
+    <column id="691" parent="614" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="657" parent="612" name="app_label">
+    <column id="692" parent="614" name="app_label">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="658" parent="612" name="model">
+    <column id="693" parent="614" name="model">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <index id="659" parent="612" name="django_content_type_app_label_model_76bd3d3b_uniq">
+    <index id="694" parent="614" name="django_content_type_app_label_model_76bd3d3b_uniq">
       <ColNames>app_label
 model</ColNames>
       <Unique>1</Unique>
     </index>
-    <key id="660" parent="612">
+    <key id="695" parent="614">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="661" parent="613" name="id">
+    <column id="696" parent="615" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="662" parent="613" name="app">
+    <column id="697" parent="615" name="app">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(255)|0s</StoredType>
     </column>
-    <column id="663" parent="613" name="name">
+    <column id="698" parent="615" name="name">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>varchar(255)|0s</StoredType>
     </column>
-    <column id="664" parent="613" name="applied">
+    <column id="699" parent="615" name="applied">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <key id="665" parent="613">
+    <key id="700" parent="615">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="666" parent="614" name="session_key">
+    <column id="701" parent="616" name="session_key">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>varchar(40)|0s</StoredType>
     </column>
-    <column id="667" parent="614" name="session_data">
+    <column id="702" parent="616" name="session_data">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>text|0s</StoredType>
     </column>
-    <column id="668" parent="614" name="expire_date">
+    <column id="703" parent="616" name="expire_date">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <index id="669" parent="614" name="sqlite_autoindex_django_session_1">
+    <index id="704" parent="616" name="sqlite_autoindex_django_session_1">
       <ColNames>session_key</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <index id="670" parent="614" name="django_session_expire_date_a5c62663">
+    <index id="705" parent="616" name="django_session_expire_date_a5c62663">
       <ColNames>expire_date</ColNames>
     </index>
-    <key id="671" parent="614">
+    <key id="706" parent="616">
       <ColNames>session_key</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>sqlite_autoindex_django_session_1</UnderlyingIndexName>
     </key>
-    <column id="672" parent="615" name="type">
+    <column id="707" parent="617" name="type">
       <Position>1</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="673" parent="615" name="name">
+    <column id="708" parent="617" name="name">
       <Position>2</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="674" parent="615" name="tbl_name">
+    <column id="709" parent="617" name="tbl_name">
       <Position>3</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="675" parent="615" name="rootpage">
+    <column id="710" parent="617" name="rootpage">
       <Position>4</Position>
       <StoredType>INT|0s</StoredType>
     </column>
-    <column id="676" parent="615" name="sql">
+    <column id="711" parent="617" name="sql">
       <Position>5</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="677" parent="616" name="name">
+    <column id="712" parent="618" name="name">
       <Position>1</Position>
     </column>
-    <column id="678" parent="616" name="seq">
+    <column id="713" parent="618" name="seq">
       <Position>2</Position>
     </column>
-    <check id="679" parent="617">
+    <check id="714" parent="619">
       <Predicate>&quot;age&quot; &gt;= 0</Predicate>
     </check>
-    <column id="680" parent="617" name="id">
+    <column id="715" parent="619" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="681" parent="617" name="password">
+    <column id="716" parent="619" name="password">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(128)|0s</StoredType>
     </column>
-    <column id="682" parent="617" name="last_login">
+    <column id="717" parent="619" name="last_login">
       <Position>3</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <column id="683" parent="617" name="is_superuser">
+    <column id="718" parent="619" name="is_superuser">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>bool|0s</StoredType>
     </column>
-    <column id="684" parent="617" name="is_staff">
+    <column id="719" parent="619" name="is_staff">
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>bool|0s</StoredType>
     </column>
-    <column id="685" parent="617" name="is_active">
+    <column id="720" parent="619" name="is_active">
       <NotNull>1</NotNull>
       <Position>6</Position>
       <StoredType>bool|0s</StoredType>
     </column>
-    <column id="686" parent="617" name="date_joined">
+    <column id="721" parent="619" name="date_joined">
       <NotNull>1</NotNull>
       <Position>7</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <column id="687" parent="617" name="username">
+    <column id="722" parent="619" name="username">
       <Position>8</Position>
       <StoredType>varchar(150)|0s</StoredType>
     </column>
-    <column id="688" parent="617" name="first_name">
+    <column id="723" parent="619" name="first_name">
       <NotNull>1</NotNull>
       <Position>9</Position>
       <StoredType>varchar(150)|0s</StoredType>
     </column>
-    <column id="689" parent="617" name="last_name">
+    <column id="724" parent="619" name="last_name">
       <NotNull>1</NotNull>
       <Position>10</Position>
       <StoredType>varchar(150)|0s</StoredType>
     </column>
-    <column id="690" parent="617" name="email">
+    <column id="725" parent="619" name="email">
       <NotNull>1</NotNull>
       <Position>11</Position>
       <StoredType>varchar(254)|0s</StoredType>
     </column>
-    <column id="691" parent="617" name="age">
+    <column id="726" parent="619" name="age">
       <NotNull>1</NotNull>
       <Position>12</Position>
       <StoredType>smallint unsigned|0s</StoredType>
     </column>
-    <index id="692" parent="617" name="sqlite_autoindex_users_user_1">
+    <index id="727" parent="619" name="sqlite_autoindex_users_user_1">
       <ColNames>email</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="693" parent="617">
+    <key id="728" parent="619">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="694" parent="617">
+    <key id="729" parent="619">
       <ColNames>email</ColNames>
       <UnderlyingIndexName>sqlite_autoindex_users_user_1</UnderlyingIndexName>
     </key>
-    <column id="695" parent="618" name="id">
+    <column id="730" parent="620" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="696" parent="618" name="user_id">
+    <column id="731" parent="620" name="user_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="697" parent="618" name="group_id">
+    <column id="732" parent="620" name="group_id">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <foreign-key id="698" parent="618">
+    <foreign-key id="733" parent="620">
       <ColNames>user_id</ColNames>
       <Deferrable>1</Deferrable>
       <InitiallyDeferred>1</InitiallyDeferred>
       <RefColNames>id</RefColNames>
       <RefTableName>users_user</RefTableName>
     </foreign-key>
-    <foreign-key id="699" parent="618">
+    <foreign-key id="734" parent="620">
       <ColNames>group_id</ColNames>
       <Deferrable>1</Deferrable>
       <InitiallyDeferred>1</InitiallyDeferred>
       <RefColNames>id</RefColNames>
       <RefTableName>auth_group</RefTableName>
     </foreign-key>
-    <index id="700" parent="618" name="users_user_groups_user_id_group_id_b88eab82_uniq">
+    <index id="735" parent="620" name="users_user_groups_user_id_group_id_b88eab82_uniq">
       <ColNames>user_id
 group_id</ColNames>
       <Unique>1</Unique>
     </index>
-    <index id="701" parent="618" name="users_user_groups_user_id_5f6f5a90">
+    <index id="736" parent="620" name="users_user_groups_user_id_5f6f5a90">
       <ColNames>user_id</ColNames>
     </index>
-    <index id="702" parent="618" name="users_user_groups_group_id_9afc8d0e">
+    <index id="737" parent="620" name="users_user_groups_group_id_9afc8d0e">
       <ColNames>group_id</ColNames>
     </index>
-    <key id="703" parent="618">
+    <key id="738" parent="620">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="704" parent="619" name="id">
+    <column id="739" parent="621" name="id">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <column id="705" parent="619" name="user_id">
+    <column id="740" parent="621" name="user_id">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>bigint|0s</StoredType>
     </column>
-    <column id="706" parent="619" name="permission_id">
+    <column id="741" parent="621" name="permission_id">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>integer|0s</StoredType>
     </column>
-    <foreign-key id="707" parent="619">
+    <foreign-key id="742" parent="621">
       <ColNames>user_id</ColNames>
       <Deferrable>1</Deferrable>
       <InitiallyDeferred>1</InitiallyDeferred>
       <RefColNames>id</RefColNames>
       <RefTableName>users_user</RefTableName>
     </foreign-key>
-    <foreign-key id="708" parent="619">
+    <foreign-key id="743" parent="621">
       <ColNames>permission_id</ColNames>
       <Deferrable>1</Deferrable>
       <InitiallyDeferred>1</InitiallyDeferred>
       <RefColNames>id</RefColNames>
       <RefTableName>auth_permission</RefTableName>
     </foreign-key>
-    <index id="709" parent="619" name="users_user_user_permissions_user_id_permission_id_43338c45_uniq">
+    <index id="744" parent="621" name="users_user_user_permissions_user_id_permission_id_43338c45_uniq">
       <ColNames>user_id
 permission_id</ColNames>
       <Unique>1</Unique>
     </index>
-    <index id="710" parent="619" name="users_user_user_permissions_user_id_20aca447">
+    <index id="745" parent="621" name="users_user_user_permissions_user_id_20aca447">
       <ColNames>user_id</ColNames>
     </index>
-    <index id="711" parent="619" name="users_user_user_permissions_permission_id_0b93982e">
+    <index id="746" parent="621" name="users_user_user_permissions_permission_id_0b93982e">
       <ColNames>permission_id</ColNames>
     </index>
-    <key id="712" parent="619">
+    <key id="747" parent="621">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>

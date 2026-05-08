@@ -31,10 +31,9 @@ class User(AbstractUser):
         null=False,
         unique=True,
     )
-    age = models.PositiveSmallIntegerField()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'age']
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     def __str__(self):
         return self.email

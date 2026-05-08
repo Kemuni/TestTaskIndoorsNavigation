@@ -17,15 +17,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         min_length=8,
         validators=[validate_password],
     )
-    age = serializers.IntegerField(
-        required=True,
-        min_value=18,
-        max_value=99,
-    )
 
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'password', 'age')
+        fields = ('email', 'first_name', 'last_name', 'password')
         extra_kwargs = {
             'first_name': {'required': True},
             'last_name': {'required': True},
@@ -36,7 +31,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
-            age=validated_data['age'],
         )
         user.set_password(validated_data['password'])
         user.save()
@@ -50,23 +44,29 @@ class LoginSerializer(serializers.ModelSerializer):
         required=True,
         min_length=8,
     )
+
     class Meta:
         model = User
         fields = ('email', 'password')
 
 
-class UserOutputSerializer(serializers.ModelSerializer):
+class UserResponseSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         required=True,
         validators=[]
     )
+
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'email', 'age')
+        fields = ('id', 'first_name', 'last_name', 'email')
+
+
+class UserProfileResponseSerializer(BaseResponseSerializer):
+    data = UserResponseSerializer(help_text='Информация о пользователе')
 
 
 class UserWithTokensResponseSerializer(serializers.Serializer):
-    user = UserOutputSerializer(help_text='Информация о пользователе')
+    user = UserResponseSerializer(help_text='Информация о пользователе')
     refresh = serializers.CharField(help_text='Refresh token')
     access = serializers.CharField(help_text='Access token')
 

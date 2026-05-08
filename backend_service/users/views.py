@@ -8,13 +8,22 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from core.mixins import BaseResponseDataFormatMixin
 from core.serializers import ErrorResponseSerializer
-from users.serializers import RegisterSerializer, AuthUserResponseSerializer, UserOutputSerializer, LoginSerializer
+from core.swagger_utils import get_default_schema_responses
+from users.serializers import (
+    RegisterSerializer,
+    AuthUserResponseSerializer,
+    UserResponseSerializer,
+    LoginSerializer,
+    UserWithTokensResponseSerializer,
+    UserProfileResponseSerializer
+)
 
 AUTH_TAG = 'User authentication'
 
 
-class RegisterView(APIView):
+class RegisterView(BaseResponseDataFormatMixin, APIView):
     """
     Регистрация нового пользователя
     """
@@ -27,7 +36,7 @@ class RegisterView(APIView):
         request=RegisterSerializer,
         responses={
             201: OpenApiResponse(response=AuthUserResponseSerializer, description="Пользователь успешно создан"),
-            400: OpenApiResponse(response=ErrorResponseSerializer, description="Ошибки валидации")
+            **get_default_schema_responses(),
         },
         tags=[AUTH_TAG],
     )
@@ -39,16 +48,16 @@ class RegisterView(APIView):
         refresh = RefreshToken.for_user(user)
 
         return Response(
-            AuthUserResponseSerializer(data={
-                'user': UserOutputSerializer(user).data,
+            UserWithTokensResponseSerializer({
+                'user': UserResponseSerializer(user).data,
                 'refresh': str(refresh),
                 'access': str(refresh.access_token)
-            }).initial_data,
+            }).data,
             status=status.HTTP_201_CREATED
         )
 
 
-class LoginView(APIView):
+class LoginView(BaseResponseDataFormatMixin, APIView):
     """
     Авторизация пользователя
     """
@@ -61,7 +70,7 @@ class LoginView(APIView):
         request=LoginSerializer,
         responses={
             200: OpenApiResponse(response=AuthUserResponseSerializer, description="Пользователь успешно создан"),
-            400: OpenApiResponse(response=ErrorResponseSerializer, description="Ошибка валидации (неверные email/пароль)"),
+            **get_default_schema_responses(),
             401: OpenApiResponse(response=ErrorResponseSerializer, description="Неверные учётные данные"),
         },
         tags=[AUTH_TAG],
@@ -86,16 +95,15 @@ class LoginView(APIView):
         refresh = RefreshToken.for_user(user)
 
         return Response(
-            AuthUserResponseSerializer(data={
-                'user': UserOutputSerializer(user).data,
+            UserWithTokensResponseSerializer({
+                'user': UserResponseSerializer(user).data,
                 'refresh': str(refresh),
                 'access': str(refresh.access_token)
-            }).initial_data,
-            status=status.HTTP_200_OK
+            }).data
         )
 
 
-class MyTokenRefreshView(TokenRefreshView):
+class MyTokenRefreshView(BaseResponseDataFormatMixin, TokenRefreshView):
     @extend_schema(
         summary="Обновление access токена",
         description='Запрашивает refresh JWT token и возвращает JWT access token, если токен обновления действителен.',
@@ -104,6 +112,7 @@ class MyTokenRefreshView(TokenRefreshView):
                 response=TokenRefreshSerializer,
                 description="Токен успешно обновлён"
             ),
+            **get_default_schema_responses(),
             401: OpenApiResponse(description="Refresh токен недействителен или просрочен"),
         },
         tags=[AUTH_TAG],
@@ -112,7 +121,7 @@ class MyTokenRefreshView(TokenRefreshView):
         return super().post(request, *args, **kwargs)
 
 
-class MyProfileView(APIView):
+class MyProfileView(BaseResponseDataFormatMixin, APIView):
     """
     Просмотр информации о себе пользователем.
     """
@@ -122,12 +131,12 @@ class MyProfileView(APIView):
         summary="Получение информации о профиле текущего пользователя ",
         responses={
             200: OpenApiResponse(
-                response=UserOutputSerializer,
+                response=UserProfileResponseSerializer,
                 description="Данные текущего пользователя"
             ),
-            401: OpenApiResponse(response=ErrorResponseSerializer, description="Требуется авторизация"),
+            **get_default_schema_responses(),
         },
         tags=[AUTH_TAG],
     )
     def get(self, request):
-        return Response(UserOutputSerializer(request.user).data)
+        return Response(UserResponseSerializer(request.user).data)
