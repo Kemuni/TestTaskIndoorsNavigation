@@ -1,5 +1,8 @@
+import os
+import uuid
 from datetime import date
 
+from django.core.files.storage import default_storage
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -108,4 +111,40 @@ class Cat(models.Model):
             models.Index(fields=['breed', 'gender']),
             models.Index(fields=['status']),
             models.Index(fields=['birthday']),
+        ]
+
+
+def get_location_for_upload(_, filename):
+    extension = filename.split('.')[-1]
+    new_filename = f"{uuid.uuid4().hex}.{extension}"
+    return os.path.join('cat_images/', new_filename)
+
+
+class CatImage(models.Model):
+    """ Модель изображений кошек """
+    id = models.AutoField(primary_key=True)
+    cat = models.ForeignKey('cats.Cat', on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to=get_location_for_upload)
+    is_main = models.BooleanField(_('is_main'), default=False)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.cat.name} - {self.id}'
+
+    def save(self, *args, **kwargs):
+        """ Сохраняем изображение. Если оно помечено как главное, то убираем эту отметку у прошлой главной фотки """
+        if self.is_main and self.cat_id:
+            CatImage.objects.filter(cat=self.cat, is_main=True).update(is_main=False)
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        """ Удаляем изображение и убираем файл из S3 хранилища """
+        if self.image:
+            default_storage.delete(self.image.name)
+        super().delete(*args, **kwargs)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['cat']),
+            models.Index(fields=['cat', 'is_main']),
         ]

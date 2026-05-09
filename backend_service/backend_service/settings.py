@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'cats',
     'drf_spectacular',
     'django_filters',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -173,3 +174,33 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+
+# Настройки хранилищ
+# https://docs.djangoproject.com/en/6.0/ref/settings/#storages
+STORAGES = {
+"staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "location": "static",
+        },
+    },
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "location": "media",
+        },
+    },
+}
+
+
+# Конфигурация подключения к MinIO
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', 'minioadmin')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', 'minioadmin')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'bucket')
+AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL', 'http://localhost:9000')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}'
+
+
+# Media files
+MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/bucket/media/'

@@ -1,13 +1,16 @@
+from django.core.exceptions import BadRequest
+from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from cats.filters import CatFilterSet
-from cats.models import Breed, Cat
+from cats.models import Breed, Cat, CatImage
 from cats.serializers import (
     BreedSerializer,
     BreedListResponseSerializer,
@@ -16,6 +19,7 @@ from cats.serializers import (
     CatListResponseSerializer,
     CatWriteSerializer,
     CatResponseSerializer,
+    CatImageUploadSerializer, CatImageSerializer, CatImageResponseSerializer,
 )
 from core.mixins import BaseResponseDataFormatMixin
 from core.swagger_utils import get_default_schema_responses
@@ -259,3 +263,99 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(self, request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Добавление фото кошки",
+        description="Добавление фото кошки",
+        request={
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'image': {
+                        'type': 'string',
+                        'format': 'binary',
+                        'nullable': False,
+                        'description': 'Файл изображения'
+                    },
+                    'is_main_image': {
+                        'type': 'boolean',
+                        'nullable': False,
+                        'description': 'Является главным изображения'
+                    }
+                }
+            }
+        },
+        parameters=[
+            OpenApiParameter('id', description='ID объявления кошки', required=True, type=int, location='path')
+        ],
+        responses={
+            201: OpenApiResponse(response=CatImageResponseSerializer, description="Фото кошки успешно добавлено"),
+            **get_default_schema_responses(),
+        },
+        tags=[SCHEMA_TAG],
+    )
+    @action(detail=True, methods=['post'], url_path='upload-image', url_name='upload_image')
+    def upload_image(self, request, **_):
+        cat = self.get_object()
+        if cat.owner.id != request.user.id:
+            raise PermissionDenied()
+
+        serializer = CatImageUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        image_obj = CatImage(
+            cat=cat,
+            image=serializer.validated_data['image'],
+            is_main=serializer.validated_data['is_main_image'],
+        )
+        image_obj.save()
+
+        response_serializer = CatImageSerializer(image_obj)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="Удаление фото кошки",
+        description="Удаление фото кошки. Если фото было главным, то новым главным фото станет самое старое фото.",
+        parameters=[
+            OpenApiParameter('id', description='ID объявления кошки', required=True, type=int, location='path'),
+            OpenApiParameter('photo_id', description='ID фото', required=True, type=int, location='path'),
+        ],
+        responses={
+            204: OpenApiResponse(description="Фото кошки успешно удалено"),
+            **get_default_schema_responses(),
+        },
+        tags=[SCHEMA_TAG],
+    )
+    @action(detail=True, methods=['delete'], url_path='images/(?P<image_id>[^/.]+)')
+    def delete_image(self, _, pk=None, image_id=None):
+        # Валидация ID
+        if image_id is None:
+            raise ValidationError('`photo_id` in the URL must be an integer')
+        try:
+            image_id = int(image_id)
+        except ValueError:
+            raise ValidationError('`photo_id` in the URL must be integer and greater than zero')
+        if image_id <= 0:
+            raise ValidationError('`photo_id` in the URL must be greater than zero')
+
+        # Проверка прав доступа
+        try:
+            photo_obj = CatImage.objects.select_related('cat').get(Q(id=image_id) & Q(cat__id=pk))
+        except CatImage.DoesNotExist:
+            raise NotFound(f'There are no cat ID={pk} with image ID={image_id}')
+
+        if photo_obj.cat.owner.id != self.request.user.id:
+            raise PermissionDenied()
+
+
+
+        # Если удаленное фото является главным, то заменяем главное изображение
+        if photo_obj.is_main:
+            cat_image = CatImage.objects.filter(cat__id=pk).order_by('uploaded_at').first()
+            if cat_image:
+                cat_image.is_main = True
+                cat_image.save()
+
+        photo_obj.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
