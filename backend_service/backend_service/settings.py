@@ -179,7 +179,7 @@ SIMPLE_JWT = {
 # Настройки хранилищ
 # https://docs.djangoproject.com/en/6.0/ref/settings/#storages
 STORAGES = {
-"staticfiles": {
+    "staticfiles": {
         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
         "OPTIONS": {
             "location": "static",

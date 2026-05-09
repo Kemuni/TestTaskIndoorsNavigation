@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from cats.filters import CatFilterSet
 from cats.models import Breed, Cat, CatImage
+from cats.permissions import IsCatOwnerOrReadWriteOnly
 from cats.serializers import (
     BreedSerializer,
     BreedListResponseSerializer,
@@ -22,6 +23,7 @@ from cats.serializers import (
     CatImageUploadSerializer, CatImageSerializer, CatImageResponseSerializer,
 )
 from core.mixins import BaseResponseDataFormatMixin
+from core.permissions import IsAdminOrReadOnly
 from core.swagger_utils import get_default_schema_responses
 
 
@@ -36,7 +38,7 @@ class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
 
     queryset = Breed.objects.all()
     serializer_class = BreedSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
 
     @extend_schema(
         summary="Получение списка пород кошек",
@@ -165,14 +167,13 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
     SCHEMA_TAG = 'Cat'
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    # filter_backends = [SearchFilter, OrderingFilter]
     filterset_class = CatFilterSet
     search_fields = ['name', 'color', 'description', 'breed__name']
     ordering_fields = ['current_weight', 'birthday', 'status']
     ordering = ['-created_at']
 
     queryset = Cat.objects.select_related('breed', 'owner', 'mother', 'father').all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsCatOwnerOrReadWriteOnly]
 
     def get_serializer_class(self):
         return CatReadSerializer if self.action in ('list', 'retrieve') else CatWriteSerializer
@@ -318,7 +319,7 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         description="Удаление фото кошки. Если фото было главным, то новым главным фото станет самое старое фото.",
         parameters=[
             OpenApiParameter('id', description='ID объявления кошки', required=True, type=int, location='path'),
-            OpenApiParameter('photo_id', description='ID фото', required=True, type=int, location='path'),
+            OpenApiParameter('image_id', description='ID фото', required=True, type=int, location='path'),
         ],
         responses={
             204: OpenApiResponse(description="Фото кошки успешно удалено"),
@@ -330,32 +331,27 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
     def delete_image(self, _, pk=None, image_id=None):
         # Валидация ID
         if image_id is None:
-            raise ValidationError('`photo_id` in the URL must be an integer')
+            raise ValidationError('`image_id` in the URL must be an integer')
         try:
             image_id = int(image_id)
         except ValueError:
-            raise ValidationError('`photo_id` in the URL must be integer and greater than zero')
+            raise ValidationError('`image_id` in the URL must be integer and greater than zero')
         if image_id <= 0:
-            raise ValidationError('`photo_id` in the URL must be greater than zero')
+            raise ValidationError('`image_id` in the URL must be greater than zero')
 
         # Проверка прав доступа
         try:
-            photo_obj = CatImage.objects.select_related('cat').get(Q(id=image_id) & Q(cat__id=pk))
+            image_obj = CatImage.objects.select_related('cat').get(Q(id=image_id) & Q(cat__id=pk))
         except CatImage.DoesNotExist:
             raise NotFound(f'There are no cat ID={pk} with image ID={image_id}')
 
-        if photo_obj.cat.owner.id != self.request.user.id:
-            raise PermissionDenied()
-
-
-
         # Если удаленное фото является главным, то заменяем главное изображение
-        if photo_obj.is_main:
+        if image_obj.is_main:
             cat_image = CatImage.objects.filter(cat__id=pk).order_by('uploaded_at').first()
             if cat_image:
                 cat_image.is_main = True
                 cat_image.save()
 
-        photo_obj.delete()
+        image_obj.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)

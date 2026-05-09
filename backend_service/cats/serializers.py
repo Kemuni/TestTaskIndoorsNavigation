@@ -31,8 +31,6 @@ class CatImageSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_image_url(obj) -> str:
         # HACK - почему-то при любых настройках она добавляет https:// перед всей ссылкой
-        print(obj.image)
-        print(obj.image.url)
         return obj.image.url.split('://', 1)[1] if obj.image else None
 
 class CatImageResponseSerializer(BaseResponseSerializer):
