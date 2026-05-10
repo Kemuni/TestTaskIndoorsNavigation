@@ -15,7 +15,6 @@ def exception_handler(exc, context):
     """ Обрабатываем каждую ошибку API и возвращаем обработанный Response """
     request: Request = context['request']
     logger.error(f"{request.method} request to {request.get_full_path()} failed: {exc}", exc_info=True)
-    print(type(exc))
 
     error_details = {
         'code': 'UNKNOWN',

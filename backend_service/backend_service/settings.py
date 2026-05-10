@@ -34,6 +34,7 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,6 +46,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'users',
     'cats',
+    'channels',
+    'chat',
     'drf_spectacular',
     'django_filters',
     'storages',
@@ -78,7 +81,15 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend_service.wsgi.application'
+ASGI_APPLICATION = 'backend_service.asgi.application'
+
+# Channel layers from django-channels
+# https://channels.readthedocs.io/en/stable/topics/channel_layers.html
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 
 # Database
