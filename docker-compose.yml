@@ -1,6 +1,25 @@
 services:
+  db:
+    image: postgres:18
+    container_name: db
+    restart: always
+    networks:
+      - internal-network
+    ports:
+      - "5432:5432"
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+
   minio:
     image: minio/minio
+    restart: always
     container_name: minio
     command: server /data --console-address ":9001"
     environment:
@@ -9,7 +28,7 @@ services:
     env_file:
       - .env
     networks:
-      - minio-network
+      - internal-network
     volumes:
       - minio-volume:/data
     ports:
@@ -18,11 +37,12 @@ services:
 
   create-buckets:
     image: minio/mc
+    restart: no
     container_name: create-buckets
     depends_on:
       - minio
     networks:
-      - minio-network
+      - internal-network
     entrypoint: >
       /bin/sh -c "
       sleep 5;
@@ -32,11 +52,49 @@ services:
       exit 0;
       "
 
+  backend:
+    build:
+      context: ./backend_service
+      dockerfile: Dockerfile
+      target: development
+    container_name: backend
+    ports:
+      - "8000:8000"
+    restart: always
+    networks:
+      - internal-network
+    depends_on:
+      - db
+      - minio
+    develop:
+      watch:
+        - path: ./backend_service
+          action: sync
+          target: ./app
+          ignore:
+            - .venv
+            - ./backend_service/.venv
+        - path: ./backend_service/requirements.txt
+          action: rebuild
+    env_file:
+      - .env
+    environment:
+      - DEBUG=${DEBUG?Variable not set}
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER?Variable not set}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD?Variable not set}
+      - AWS_STORAGE_BUCKET_NAME=${MINIO_DEFAULT_BUCKET_NAME?Variable not set}
+      - AWS_S3_ENDPOINT_URL=${MINIO_ENDPOINT_URL?Variable not set}
+      - POSTGRES_SERVER=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+
 
 networks:
-  minio-network:
+  internal-network:
     driver: bridge
 
 volumes:
   minio-volume:
-    driver: local
+  app-db-data:
