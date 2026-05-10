@@ -8,6 +8,7 @@ urlpatterns = [
     # API endpoints
     path('api/', include('users.urls')),
     path('api/', include('cats.urls')),
+    path('api/', include('chat.urls')),
 
     # API schema
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
