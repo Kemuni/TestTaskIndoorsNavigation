@@ -94,7 +94,7 @@ class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         tags=[SCHEMA_TAG],
     )
     def update(self, request, *args, **kwargs):
-        return super().update(self, request, *args, **kwargs)
+        return super().update(request, *args, **kwargs)
 
     @extend_schema(
         summary="Частичное обновление породы кошки",
@@ -110,7 +110,7 @@ class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         tags=[SCHEMA_TAG],
     )
     def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(self, request, *args, **kwargs)
+        return super().partial_update(request, *args, **kwargs)
 
     @extend_schema(
         summary="Удаление породы кошки",
@@ -125,7 +125,7 @@ class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         tags=[SCHEMA_TAG],
     )
     def destroy(self, request, *args, **kwargs):
-        return super().destroy(self, request, *args, **kwargs)
+        return super().destroy(request, *args, **kwargs)
 
     @extend_schema(
         summary="Получение всех кошек с породой с введенным ID",
@@ -232,7 +232,7 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         tags=[SCHEMA_TAG],
     )
     def update(self, request, *args, **kwargs):
-        return super().update(self, request, *args, **kwargs)
+        return super().update(request, *args, **kwargs)
 
     @extend_schema(
         summary="Частичное обновление объявления кошки",
@@ -248,7 +248,7 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         tags=[SCHEMA_TAG],
     )
     def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(self, request, *args, **kwargs)
+        return super().partial_update(request, *args, **kwargs)
 
     @extend_schema(
         summary="Удаление объявления кошки",
@@ -263,7 +263,7 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         tags=[SCHEMA_TAG],
     )
     def destroy(self, request, *args, **kwargs):
-        return super().destroy(self, request, *args, **kwargs)
+        return super().destroy(request, *args, **kwargs)
 
     @extend_schema(
         summary="Добавление фото кошки",

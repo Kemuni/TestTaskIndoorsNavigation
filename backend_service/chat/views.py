@@ -7,11 +7,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from chat.models import Dialog, Message
-from chat.serializers import DialogSummarySerializer, DialogWithMessagesSerializer, ShortMessageSerializer
+from chat.serializers import DialogSummarySerializer, DialogWithMessagesSerializer, ShortMessageSerializer, \
+    DialogSummaryResponseSerializer, DialogWithMessagesResponseSerializer, ShortMessageResponseSerializer
+from core.mixins import BaseResponseDataFormatMixin
+from core.pagination import FixResponsePaginatedSchemaMixin
 from core.swagger_utils import get_default_schema_responses
 
 
-class CursorSetPagination(pagination.CursorPagination):
+class CursorSetPagination(FixResponsePaginatedSchemaMixin, pagination.CursorPagination):
     page_size = 100
     page_size_query_param = 'page_size'
     max_page_size = 500
@@ -19,7 +22,7 @@ class CursorSetPagination(pagination.CursorPagination):
     cursor_query_param = 'cursor'
 
 
-class DialogViewSet(viewsets.GenericViewSet):
+class DialogViewSet(BaseResponseDataFormatMixin, viewsets.GenericViewSet):
     """ ViewSet для работы с диалогами """
     SCHEMA_TAG = 'Dialogs'
 
@@ -39,7 +42,7 @@ class DialogViewSet(viewsets.GenericViewSet):
         summary="Получение диалогов пользователя",
         description="Получение диалогов пользователя",
         responses={
-            200: OpenApiResponse(response=DialogSummarySerializer(many=True), description="Данные диалогов"),
+            200: OpenApiResponse(response=DialogSummaryResponseSerializer, description="Данные диалогов"),
             **get_default_schema_responses(),
         },
         tags=[SCHEMA_TAG],
@@ -101,7 +104,7 @@ class DialogViewSet(viewsets.GenericViewSet):
             OpenApiParameter('id', description='ID диалога', required=True, type=int, location='path'),
         ],
         responses={
-            200: OpenApiResponse(response=DialogWithMessagesSerializer, description="Данные и сообщения диалога"),
+            200: OpenApiResponse(response=DialogWithMessagesResponseSerializer, description="Данные и сообщения диалога"),
             **get_default_schema_responses(),
         },
         tags=[SCHEMA_TAG],
@@ -141,7 +144,7 @@ class DialogViewSet(viewsets.GenericViewSet):
         summary="Получение сообщений из диалога",
         description="Получение сообщений из диалога",
         responses={
-            200: OpenApiResponse(response=ShortMessageSerializer(many=True), description="Сообщения"),
+            200: OpenApiResponse(response=ShortMessageResponseSerializer, description="Сообщения"),
             **get_default_schema_responses(),
         },
         tags=[SCHEMA_TAG],

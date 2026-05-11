@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import serializers, pagination
 
+from backend_service.settings import PUBLIC_S3_ENDPOINT_URL, AWS_S3_ENDPOINT_URL
 from cats.models import Breed, Cat, CatImage
 from core.serializers import BaseResponseSerializer
 
@@ -31,7 +32,7 @@ class CatImageSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_image_url(obj) -> str:
         # HACK - почему-то при любых настройках она добавляет https:// перед всей ссылкой
-        return obj.image.url.split('://', 1)[1] if obj.image else None
+        return obj.image.url.replace(AWS_S3_ENDPOINT_URL, PUBLIC_S3_ENDPOINT_URL).split('://', 1)[1] if obj.image else None
 
 class CatImageResponseSerializer(BaseResponseSerializer):
     data = CatImageSerializer(many=True)
