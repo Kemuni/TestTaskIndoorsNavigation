@@ -1,12 +1,12 @@
-from django.core.exceptions import BadRequest
+from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins, permissions
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from cats.filters import CatFilterSet
@@ -26,9 +26,13 @@ from core.mixins import BaseResponseDataFormatMixin
 from core.permissions import IsAdminOrReadOnly
 from core.swagger_utils import get_default_schema_responses
 
+User = get_user_model()
 
-class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
-    """ ViewSet для работы с породами кошек """
+class ReadBreedViewSet(BaseResponseDataFormatMixin,
+                       mixins.RetrieveModelMixin,
+                       mixins.ListModelMixin,
+                       viewsets.GenericViewSet):
+    """ ViewSet для чтения пород кошек """
     SCHEMA_TAG = 'Breed'
 
     filter_backends = [SearchFilter, OrderingFilter]
@@ -38,19 +42,90 @@ class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
 
     queryset = Breed.objects.all()
     serializer_class = BreedSerializer
-    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
+    permission_classes = [permissions.AllowAny]
 
     @extend_schema(
         summary="Получение списка пород кошек",
         description="Получение списка пород кошек",
         responses={
-            200: OpenApiResponse(response=BreedListResponseSerializer,description="Данные о породах"),
+            200: OpenApiResponse(response=BreedListResponseSerializer, description="Данные о породах"),
             **get_default_schema_responses(),
         },
         tags=[SCHEMA_TAG],
+        auth=[],
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Получение породы кошки по ID",
+        description="Получение породы кошки по ID",
+        parameters=[
+            OpenApiParameter('id', description='ID породы кошки', required=True, type=int, location='path')
+        ],
+        responses={
+            200: OpenApiResponse(response=BreedResponseSerializer, description="Данные о породе"),
+            **get_default_schema_responses(),
+        },
+        tags=[SCHEMA_TAG],
+        auth=[],
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Получение всех кошек с определенной породой",
+        description="Получение всех кошек с определенной породой",
+        parameters=[
+            OpenApiParameter('id', description='ID породы кошки', required=True, type=int, location='path')
+        ],
+        responses={
+            200: OpenApiResponse(response=CatListResponseSerializer,
+                                 description="Данные о кошек с определенной породой"),
+            **get_default_schema_responses(),
+        },
+        tags=[SCHEMA_TAG],
+        auth=[],
+    )
+    @action(detail=True, methods=['get'])
+    def cats(self, _, pk=None):
+        if pk is None:
+            raise ValidationError('`id` in the URL must be an integer')
+        try:
+            breed_id = int(pk)
+        except ValueError:
+            raise ValidationError('`id` in the URL must be integer and greater than zero')
+        if breed_id <= 0:
+            raise ValidationError('`id` in the URL must be greater than zero')
+
+        queryset = (Cat.objects
+                    .filter(breed__id=breed_id)
+                    .select_related('breed', 'owner', 'mother', 'father')
+                    .all()
+                    )
+        page = self.paginate_queryset(queryset)
+        if page is None:
+            raise NotImplementedError('You have to add paginator class to the ViewSet.')
+        serializer = CatReadSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+
+class WriteBreedViewSet(BaseResponseDataFormatMixin,
+                        mixins.CreateModelMixin,
+                        mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin,
+                        viewsets.GenericViewSet):
+    """ ViewSet для изменения пород кошек """
+    SCHEMA_TAG = 'Breed'
+
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['name', 'description']
+    ordering_fields = ['name']
+    ordering = ['name']
+
+    queryset = Breed.objects.all()
+    serializer_class = BreedSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
 
     @extend_schema(
         summary="Создание породы кошек",
@@ -64,21 +139,6 @@ class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
     )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
-
-    @extend_schema(
-        summary="Получение породы кошки по ID",
-        description="Получение породы кошки по ID",
-        parameters=[
-            OpenApiParameter('id', description='ID породы кошки', required=True, type=int, location='path')
-        ],
-        responses={
-            200: OpenApiResponse(response=BreedResponseSerializer, description="Данные о породе"),
-            **get_default_schema_responses(),
-        },
-        tags=[SCHEMA_TAG],
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
 
     @extend_schema(
         summary="Обновление породы кошки",
@@ -127,56 +187,27 @@ class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
 
-    @extend_schema(
-        summary="Получение всех кошек с породой с введенным ID",
-        description="Получение всех кошек с породой с введенным ID",
-        parameters=[
-            OpenApiParameter('id', description='ID породы кошки', required=True, type=int, location='path')
-        ],
-        responses={
-            200: OpenApiResponse(response=CatListResponseSerializer, description="Данные о кошек с определенной породой"),
-            **get_default_schema_responses(),
-        },
-        tags=[SCHEMA_TAG],
-    )
-    @action(detail=True, methods=['get'])
-    def cats(self, _, pk=None):
-        if pk is None:
-            raise ValidationError('`id` in the URL must be an integer')
-        try:
-            breed_id = int(pk)
-        except ValueError:
-            raise ValidationError('`id` in the URL must be integer and greater than zero')
-        if breed_id <= 0:
-            raise ValidationError('`id` in the URL must be greater than zero')
 
-        queryset = (Cat.objects
-                    .filter(breed__id=breed_id)
-                    .select_related('breed', 'owner', 'mother', 'father')
-                    .all()
-        )
-        page = self.paginate_queryset(queryset)
-        if page is None:
-            raise NotImplementedError('You have to add paginator class to the ViewSet.')
-        serializer = CatReadSerializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
-
-
-class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
-    """ ViewSet для работы с объявлениями кошек """
+class ReadCatViewSet(BaseResponseDataFormatMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.ListModelMixin,
+                     viewsets.GenericViewSet):
+    """ ViewSet для чтения объявления кошек """
     SCHEMA_TAG = 'Cat'
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = CatFilterSet
-    search_fields = ['name', 'color', 'description', 'breed__name']
+    search_fields = ['@name', '@color', '@description', '@breed__name']
     ordering_fields = ['current_weight', 'birthday', 'status']
     ordering = ['-created_at']
 
     queryset = Cat.objects.select_related('breed', 'owner', 'mother', 'father').all()
-    permission_classes = [IsAuthenticated, IsCatOwnerOrReadWriteOnly]
+    serializer_class = CatReadSerializer
 
-    def get_serializer_class(self):
-        return CatReadSerializer if self.action in ('list', 'retrieve') else CatWriteSerializer
+    def get_permissions(self):
+        if self.action == 'my':
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
 
     @extend_schema(
         summary="Получение списка объявления кошек",
@@ -186,9 +217,84 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
             **get_default_schema_responses(),
         },
         tags=[SCHEMA_TAG],
+        auth=[],
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Получение кошки по ID",
+        description="Получение кошки по ID",
+        parameters=[
+            OpenApiParameter('id', description='ID кошки', required=True, type=int, location='path')
+        ],
+        responses={
+            200: OpenApiResponse(response=CatResponseSerializer, description="Данные о кошке"),
+            **get_default_schema_responses(),
+        },
+        tags=[SCHEMA_TAG],
+        auth=[],
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Получение кошек текущего пользователя",
+        description="Получение кошек текущего пользователя",
+        responses={
+            200: OpenApiResponse(response=CatListResponseSerializer, description="Данные о кошах"),
+            **get_default_schema_responses(),
+        },
+        tags=[SCHEMA_TAG],
+    )
+    @action(detail=False, methods=['get'])
+    def my(self, _, *__, **___):
+        queryset = self.get_queryset()
+        queryset = queryset.filter(owner=self.request.user)
+        page = self.paginate_queryset(queryset)
+        if page is None:
+            raise NotImplementedError('You have to add paginator class to the ViewSet.')
+        serializer = CatReadSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+    @extend_schema(
+        summary="Получение кошек пользователя по ID",
+        description="Получение всех кошек указанного пользователя",
+        parameters=[
+            OpenApiParameter('user_id', description='ID пользователя', required=True, type=int, location='path')
+        ],
+        responses={
+            200: OpenApiResponse(response=CatListResponseSerializer, description="Список кошек пользователя"),
+            404: OpenApiResponse(description="Пользователь не найден"),
+            **get_default_schema_responses(),
+        },
+        tags=[SCHEMA_TAG],
+        auth=[],
+    )
+    @action(detail=False, methods=['get'], url_path='by-user/(?P<user_id>[^/.]+)')
+    def user_cats(self, _, user_id=None):
+        user = get_object_or_404(User, id=user_id)
+
+        queryset = self.get_queryset().filter(owner=user)
+        page = self.paginate_queryset(queryset)
+        if page is None:
+            raise NotImplementedError('You have to add paginator class to the ViewSet.')
+        serializer = CatReadSerializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+
+
+
+class WriteCatViewSet(BaseResponseDataFormatMixin,
+                      mixins.CreateModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
+    """ ViewSet для изменения объявлений кошек """
+    SCHEMA_TAG = 'Cat'
+
+    queryset = Cat.objects.select_related('breed', 'owner', 'mother', 'father').all()
+    permission_classes = [permissions.IsAuthenticated, IsCatOwnerOrReadWriteOnly]
+    serializer_class = CatWriteSerializer
 
     @extend_schema(
         summary="Создание объявление для кошки",
@@ -202,21 +308,6 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
     )
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
-
-    @extend_schema(
-        summary="Получение кошки по ID",
-        description="Получение кошки по ID",
-        parameters=[
-            OpenApiParameter('id', description='ID кошки', required=True, type=int, location='path')
-        ],
-        responses={
-            200: OpenApiResponse(response=CatResponseSerializer, description="Данные о кошке"),
-            **get_default_schema_responses(),
-        },
-        tags=[SCHEMA_TAG],
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
 
     @extend_schema(
         summary="Обновление объявления кошки",

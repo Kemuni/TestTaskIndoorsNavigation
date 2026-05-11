@@ -21,6 +21,7 @@ from users.serializers import (
 )
 
 AUTH_TAG = 'User authentication'
+PROFILE_TAG = 'User profile'
 User = get_user_model()
 
 class RegisterView(BaseResponseDataFormatMixin, APIView):
@@ -142,7 +143,7 @@ class ProfileView(BaseResponseDataFormatMixin, mixins.RetrieveModelMixin, viewse
             ),
             **get_default_schema_responses(),
         },
-        tags=[AUTH_TAG],
+        tags=[PROFILE_TAG],
     )
     @action(detail=False, methods=['get'], url_path='my')
     def my_profile(self, request):
@@ -157,7 +158,7 @@ class ProfileView(BaseResponseDataFormatMixin, mixins.RetrieveModelMixin, viewse
             ),
             **get_default_schema_responses(),
         },
-        tags=[AUTH_TAG],
+        tags=[PROFILE_TAG],
         auth=[],
     )
     def retrieve(self, *args, **kwargs):
