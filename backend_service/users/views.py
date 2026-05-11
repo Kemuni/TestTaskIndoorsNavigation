@@ -1,7 +1,7 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from drf_spectacular.utils import extend_schema, OpenApiResponse
-from rest_framework import status, permissions
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status, permissions, viewsets, mixins
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
@@ -21,7 +21,7 @@ from users.serializers import (
 )
 
 AUTH_TAG = 'User authentication'
-
+User = get_user_model()
 
 class RegisterView(BaseResponseDataFormatMixin, APIView):
     """
@@ -121,11 +121,17 @@ class MyTokenRefreshView(BaseResponseDataFormatMixin, TokenRefreshView):
         return super().post(request, *args, **kwargs)
 
 
-class MyProfileView(BaseResponseDataFormatMixin, APIView):
+class ProfileView(BaseResponseDataFormatMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
-    Просмотр информации о себе пользователем.
+    Просмотр информации о профилях пользователей.
     """
-    permission_classes = [IsAuthenticated]
+    queryset = User
+    serializer_class = UserResponseSerializer
+
+    def get_permissions(self):
+        if self.action in ('retrieve',):
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
     @extend_schema(
         summary="Получение информации о профиле текущего пользователя ",
@@ -138,5 +144,21 @@ class MyProfileView(BaseResponseDataFormatMixin, APIView):
         },
         tags=[AUTH_TAG],
     )
-    def get(self, request):
+    @action(detail=False, methods=['get'], url_path='my')
+    def my_profile(self, request):
         return Response(UserResponseSerializer(request.user).data)
+
+    @extend_schema(
+        summary="Получение информации о профиле",
+        responses={
+            200: OpenApiResponse(
+                response=UserProfileResponseSerializer,
+                description="Данные пользователя"
+            ),
+            **get_default_schema_responses(),
+        },
+        tags=[AUTH_TAG],
+        auth=[],
+    )
+    def retrieve(self, *args, **kwargs):
+        return super().retrieve(*args, **kwargs)

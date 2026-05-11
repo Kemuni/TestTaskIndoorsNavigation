@@ -2,7 +2,9 @@ from rest_framework import pagination
 
 
 class FixResponsePaginatedSchemaMixin:
-    """ Приводит Open API схему к единому формату BaseResponseSerializer """
+    """
+    Приводит Open API схему пагинаций `rest_framework.BasePagination` к единому формату `core.BaseResponseSerializer`
+    """
     def get_paginated_response_schema(self, schema):
         # HACK - Следует добавить динамическое определение schema на основе BaseResponseSerializer
         default_schema = super().get_paginated_response_schema(schema)
