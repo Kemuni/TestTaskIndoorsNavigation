@@ -1,0 +1,279 @@
+<p-toast />
+
+<main class="max-w-2xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold text-slate-900 mb-6">
+    {{ isEdit() ? 'Редактировать объявление' : 'Новое объявление' }}
+  </h1>
+
+  @if (!savedCat()) {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      novalidate
+      class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col gap-5"
+      aria-label="Форма объявления"
+    >
+      @if (submitError()) {
+        <p-message severity="error" [text]="submitError()!" styleClass="w-full" />
+      }
+
+      <!-- Name -->
+      <div class="flex flex-col gap-1">
+        <label for="cat-name" class="text-sm font-medium text-slate-700">
+          Имя <span class="text-red-500" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="cat-name"
+          pInputText
+          type="text"
+          formControlName="name"
+          placeholder="Мурзик"
+          class="w-full"
+          [attr.aria-invalid]="fieldInvalid('name')"
+          aria-describedby="cat-name-error"
+          aria-required="true"
+        />
+        @if (fieldInvalid('name')) {
+          <span id="cat-name-error" class="text-xs text-red-600" role="alert">Введите имя</span>
+        }
+      </div>
+
+      <!-- Gender + Birthday -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="cat-gender" class="text-sm font-medium text-slate-700">
+            Пол <span class="text-red-500" aria-hidden="true">*</span>
+          </label>
+          <p-select
+            inputId="cat-gender"
+            formControlName="gender"
+            [options]="genderOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Выберите пол"
+            styleClass="w-full"
+            appendTo="body"
+            aria-required="true"
+          />
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="cat-birthday" class="text-sm font-medium text-slate-700">
+            Дата рождения <span class="text-red-500" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="cat-birthday"
+            pInputText
+            type="date"
+            formControlName="birthday"
+            class="w-full"
+            [attr.aria-invalid]="fieldInvalid('birthday')"
+            aria-required="true"
+          />
+          @if (fieldInvalid('birthday')) {
+            <span class="text-xs text-red-600" role="alert">Укажите дату рождения</span>
+          }
+        </div>
+      </div>
+
+      <!-- Breed + Color -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="cat-breed" class="text-sm font-medium text-slate-700">
+            Порода <span class="text-red-500" aria-hidden="true">*</span>
+          </label>
+          <p-select
+            inputId="cat-breed"
+            formControlName="breed_id"
+            [options]="breedOptions()"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Выберите породу"
+            styleClass="w-full"
+            [filter]="true"
+            filterPlaceholder="Поиск породы"
+            appendTo="body"
+            aria-required="true"
+          />
+          @if (fieldInvalid('breed_id')) {
+            <span class="text-xs text-red-600" role="alert">Выберите породу</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label for="cat-color" class="text-sm font-medium text-slate-700">
+            Цвет <span class="text-red-500" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="cat-color"
+            pInputText
+            type="text"
+            formControlName="color"
+            placeholder="Рыжий"
+            class="w-full"
+            [attr.aria-invalid]="fieldInvalid('color')"
+            aria-required="true"
+          />
+        </div>
+      </div>
+
+      <!-- Weights -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="cat-cw" class="text-sm font-medium text-slate-700">
+            Текущий вес (кг) <span class="text-red-500" aria-hidden="true">*</span>
+          </label>
+          <p-inputnumber
+            inputId="cat-cw"
+            formControlName="current_weight"
+            [minFractionDigits]="2"
+            [maxFractionDigits]="2"
+            [min]="0.01"
+            placeholder="3.50"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+            aria-required="true"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="cat-bw" class="text-sm font-medium text-slate-700">
+            Вес при рождении (кг) <span class="text-red-500" aria-hidden="true">*</span>
+          </label>
+          <p-inputnumber
+            inputId="cat-bw"
+            formControlName="birth_weight"
+            [minFractionDigits]="2"
+            [maxFractionDigits]="2"
+            [min]="0.01"
+            placeholder="0.10"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+            aria-required="true"
+          />
+        </div>
+      </div>
+
+      <!-- Status + Price -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="cat-status" class="text-sm font-medium text-slate-700">
+            Статус <span class="text-red-500" aria-hidden="true">*</span>
+          </label>
+          <p-select
+            inputId="cat-status"
+            formControlName="status"
+            [options]="statusOptions"
+            optionLabel="label"
+            optionValue="value"
+            styleClass="w-full"
+            appendTo="body"
+            aria-required="true"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="cat-price" class="text-sm font-medium text-slate-700">
+            Цена (₽, пусто = бесплатно)
+          </label>
+          <input
+            id="cat-price"
+            pInputText
+            type="text"
+            formControlName="price"
+            placeholder="0"
+            class="w-full"
+          />
+        </div>
+      </div>
+
+      <!-- Sterilized -->
+      <div class="flex items-center gap-2">
+        <p-checkbox
+          formControlName="is_sterilized"
+          [binary]="true"
+          inputId="cat-sterilized"
+          aria-label="Стерилизована"
+        />
+        <label for="cat-sterilized" class="text-sm text-slate-700 cursor-pointer">Стерилизована / кастрирован</label>
+      </div>
+
+      <!-- Description -->
+      <div class="flex flex-col gap-1">
+        <label for="cat-desc" class="text-sm font-medium text-slate-700">Описание</label>
+        <textarea
+          id="cat-desc"
+          pTextarea
+          formControlName="description"
+          placeholder="Расскажите о коте..."
+          rows="4"
+          class="w-full resize-y"
+        ></textarea>
+      </div>
+
+      <!-- Parents -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="cat-mother" class="text-sm font-medium text-slate-700">ID матери (необязательно)</label>
+          <p-inputnumber
+            inputId="cat-mother"
+            formControlName="mother_id"
+            [showButtons]="false"
+            placeholder="ID кошки"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="cat-father" class="text-sm font-medium text-slate-700">ID отца (необязательно)</label>
+          <p-inputnumber
+            inputId="cat-father"
+            formControlName="father_id"
+            [showButtons]="false"
+            placeholder="ID кота"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <p-button
+          type="submit"
+          [label]="isEdit() ? 'Сохранить' : 'Создать объявление'"
+          [loading]="loading()"
+          styleClass="flex-1"
+        />
+        <p-button
+          type="button"
+          label="Отмена"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="onFinish()"
+        />
+      </div>
+    </form>
+  } @else {
+    <!-- After creation: image upload step -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col gap-5">
+      <div class="flex items-center gap-3 text-green-600">
+        <i class="pi pi-check-circle text-2xl" aria-hidden="true"></i>
+        <h2 class="text-lg font-semibold">Объявление создано!</h2>
+      </div>
+      <p class="text-slate-600 text-sm">Теперь вы можете добавить фотографии к вашему объявлению.</p>
+
+      <app-image-gallery
+        [images]="savedCat()!.images"
+        [editMode]="true"
+        (uploadImages)="onUploadImages($event)"
+        (deleteImage)="onDeleteImage($event)"
+      />
+
+      <p-button
+        label="Готово — перейти к объявлению"
+        icon="pi pi-arrow-right"
+        iconPos="right"
+        (onClick)="onFinish()"
+        styleClass="w-full"
+      />
+    </div>
+  }
+</main>
