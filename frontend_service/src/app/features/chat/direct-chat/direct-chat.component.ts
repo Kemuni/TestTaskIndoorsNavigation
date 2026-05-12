@@ -18,7 +18,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { UsersService } from '../../../core/services/users.service';
 import { ShortMessage } from '../../../core/models/dialog.model';
 import { User } from '../../../core/models/user.model';
-import { Subscription, switchMap } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -82,12 +82,18 @@ import { SkeletonModule } from 'primeng/skeleton';
               >
                 <p class="m-0">{{ msg.content }}</p>
                 <time
-                  class="block text-xs mt-1 opacity-70"
+                  class="block text-xs mt-1 opacity-70 flex items-center gap-1"
                   [attr.datetime]="msg.created_at"
                 >
                   {{ formatTime(msg.created_at) }}
-                  @if (isOwn(msg) && msg.read_at) {
-                    <span class="ml-1" aria-label="Прочитано">✓✓</span>
+                  @if (isOwn(msg)) {
+                    @if (msg._pending) {
+                      <i class="pi pi-spin pi-spinner text-xs opacity-70 ml-1" aria-label="Отправляется"></i>
+                    } @else if (msg.read_at) {
+                      <span class="ml-1" aria-label="Прочитано">✓✓</span>
+                    } @else {
+                      <span class="ml-1" aria-label="Доставлено">✓</span>
+                    }
                   }
                 </time>
               </div>
@@ -153,13 +159,11 @@ export class DirectChatComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   ngOnInit(): void {
-    // Load receiver profile
     this.usersService.getProfile(this.receiverUserId).subscribe({
       next: (res) => this.receiver.set(res.data),
       error: () => { /* non-critical */ },
     });
 
-    // Try to find existing dialog and preload messages
     this.dialogsService.getDialogs().subscribe({
       next: (res) => {
         const existing = res.data.results.find(
@@ -175,6 +179,7 @@ export class DirectChatComponent implements OnInit, OnDestroy, AfterViewChecked 
             complete: () => {
               this.loading.set(false);
               this.connectWebSocket();
+              this.markUnreadMessages();
             },
           });
         } else {
@@ -189,19 +194,53 @@ export class DirectChatComponent implements OnInit, OnDestroy, AfterViewChecked 
     });
   }
 
+  private markUnreadMessages(): void {
+    const uid = this.currentUserId;
+    const unreadIds = this.messages()
+      .filter((m) => m.sender_id !== uid && m.read_at === null)
+      .map((m) => m.id);
+    if (unreadIds.length > 0) {
+      this.chatService.readMessages(unreadIds);
+    }
+  }
+
   private connectWebSocket(): void {
     this.chatService.connectToUser(this.receiverUserId);
     this.wsSub = this.chatService.messages$.subscribe((wsMsg) => {
-      if (wsMsg.type === 'message' && wsMsg.id && wsMsg.content) {
-        const msg: ShortMessage = {
+      if (wsMsg.type === 'message' && wsMsg.id != null && wsMsg.content) {
+        // Find a pending message from the current user with matching content and replace it
+        const uid = this.currentUserId;
+        const pendingIdx = this.messages().findIndex(
+          (m) => m._pending && m.content === wsMsg.content && m.sender_id === uid,
+        );
+        const confirmed: ShortMessage = {
           id: wsMsg.id,
           content: wsMsg.content,
           created_at: wsMsg.created_at ?? new Date().toISOString(),
           sender_id: wsMsg.sender_id ?? 0,
           read_at: wsMsg.read_at ?? null,
         };
-        this.messages.update((msgs) => [...msgs, msg]);
+        if (pendingIdx !== -1) {
+          this.messages.update((msgs) => {
+            const updated = [...msgs];
+            updated[pendingIdx] = confirmed;
+            return updated;
+          });
+        } else {
+          this.messages.update((msgs) => [...msgs, confirmed]);
+        }
         this.shouldScrollBottom = true;
+      } else if (wsMsg.type === 'delete_messages' && wsMsg.message_ids?.length) {
+        this.messages.update((msgs) =>
+          msgs.filter((m) => !wsMsg.message_ids!.includes(m.id)),
+        );
+      } else if (wsMsg.type === 'read_messages' && wsMsg.message_ids?.length) {
+        const now = new Date().toISOString();
+        this.messages.update((msgs) =>
+          msgs.map((m) =>
+            wsMsg.message_ids!.includes(m.id) ? { ...m, read_at: now } : m,
+          ),
+        );
       }
     });
   }
@@ -226,6 +265,16 @@ export class DirectChatComponent implements OnInit, OnDestroy, AfterViewChecked 
     const content = this.messageForm.controls.content.value.trim();
     if (!content || this.messageForm.invalid) return;
 
+    const uid = this.currentUserId ?? 0;
+    const pending: ShortMessage = {
+      id: -Date.now(),
+      content,
+      created_at: new Date().toISOString(),
+      sender_id: uid,
+      read_at: null,
+      _pending: true,
+    };
+    this.messages.update((msgs) => [...msgs, pending]);
     this.chatService.send(content);
     this.messageForm.reset();
     this.shouldScrollBottom = true;

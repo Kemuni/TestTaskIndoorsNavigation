@@ -20,6 +20,7 @@ export interface ShortMessage {
   created_at: string;
   sender_id: number;
   read_at: string | null;
+  _pending?: boolean;
 }
 
 export interface DialogSummary {
@@ -36,23 +37,26 @@ export interface DialogWithMessages {
 }
 
 export interface WsMessage {
-  type: 'message' | 'read' | 'error';
+  type: 'message' | 'delete_messages' | 'read_messages' | 'error';
   id?: number;
   content?: string;
   sender_id?: number;
   created_at?: string;
   read_at?: string | null;
+  message_ids?: number[];
   message?: string;
 }
 
-/** Raw frame sent by the server for new messages */
+/** Raw frame sent by the server */
 export interface WsRawFrame {
   success?: boolean;
+  action?: 'send_message' | 'delete_messages' | 'read_messages';
   message?: {
     id: number;
     sender_id: number;
     content: string;
     created_at?: string;
   };
+  message_ids?: number[];
   type?: string;
 }

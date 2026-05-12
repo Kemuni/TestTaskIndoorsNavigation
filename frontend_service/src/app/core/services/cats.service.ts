@@ -35,9 +35,12 @@ export class CatsService {
     return this.http.delete<void>(`/api/cat/${id}/`);
   }
 
-  uploadImage(catId: number, file: File): Observable<ApiResponse<CatImage[]>> {
+  uploadImage(catId: number, file: File, isMain?: boolean): Observable<ApiResponse<CatImage[]>> {
     const form = new FormData();
     form.append('image', file);
+    if (isMain !== undefined) {
+      form.append('is_main', isMain ? 'true' : 'false');
+    }
     return this.http.post<ApiResponse<CatImage[]>>(`/api/cat/${catId}/upload-image/`, form);
   }
 

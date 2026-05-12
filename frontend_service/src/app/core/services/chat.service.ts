@@ -38,8 +38,8 @@ export class ChatService {
   }
 
   private normalize(raw: WsRawFrame): WsMessage | null {
-    // Format: { success: true, message: { id, sender_id, content, created_at? } }
-    if (raw.success && raw.message) {
+    // New action-based format
+    if (raw.success && raw.action === 'send_message' && raw.message) {
       return {
         type: 'message',
         id: raw.message.id,
@@ -48,6 +48,12 @@ export class ChatService {
         created_at: raw.message.created_at ?? new Date().toISOString(),
         read_at: null,
       };
+    }
+    if (raw.success && raw.action === 'delete_messages' && raw.message_ids) {
+      return { type: 'delete_messages', message_ids: raw.message_ids };
+    }
+    if (raw.success && raw.action === 'read_messages' && raw.message_ids) {
+      return { type: 'read_messages', message_ids: raw.message_ids };
     }
     // Legacy flat format: { type: 'message', id, sender_id, content, ... }
     if (raw.type === 'message') {
@@ -71,7 +77,7 @@ export class ChatService {
 
     const token = this.authService.getAccessToken();
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    const url = `${proto}://${location.host}/ws/dialog/${dialogId}/${token ? `?token=${token}` : ''}`;
+    const url = `${proto}://${location.host}/ws/chat/${dialogId}/${token ? `?token=${token}` : ''}`;
 
     this.ws = new WebSocket(url);
     this.attachHandlers();
@@ -92,12 +98,20 @@ export class ChatService {
 
   /** For ws/dialog/{id}/ connections */
   sendToDialog(content: string): void {
-    this.enqueueOrSend(JSON.stringify({ type: 'message', content }));
+    this.enqueueOrSend(JSON.stringify({ type: 'send_message', message: content }));
   }
 
   /** For ws/chat/{userId}/ connections */
   send(message: string): void {
     this.enqueueOrSend(JSON.stringify({ type: 'send_message', message }));
+  }
+
+  readMessages(ids: number[]): void {
+    this.enqueueOrSend(JSON.stringify({ type: 'read_messages', message_ids: ids }));
+  }
+
+  deleteMessages(ids: number[]): void {
+    this.enqueueOrSend(JSON.stringify({ type: 'delete_messages', message_ids: ids }));
   }
 
   disconnect(): void {

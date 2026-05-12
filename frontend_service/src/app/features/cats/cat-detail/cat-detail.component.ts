@@ -10,6 +10,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ImageGalleryComponent } from '../../../shared/components/image-gallery/image-gallery.component';
 import { CatsService } from '../../../core/services/cats.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { FavouritesService } from '../../../core/services/favourites.service';
 import { CatRead, GENDER_LABELS, STATUS_LABELS, STATUS_SEVERITY } from '../../../core/models/cat.model';
 import { HAIR_TYPE_LABELS } from '../../../core/models/breed.model';
 import { TagModule } from 'primeng/tag';
@@ -39,6 +40,7 @@ export class CatDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly catsService = inject(CatsService);
   private readonly authService = inject(AuthService);
+  private readonly favouritesService = inject(FavouritesService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly messageService = inject(MessageService);
 
@@ -46,6 +48,8 @@ export class CatDetailComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly uploadLoading = signal(false);
+  readonly favouriteId = signal<number | null>(null);
+  readonly favLoading = signal(false);
 
   readonly hairTypeLabels = HAIR_TYPE_LABELS;
 
@@ -93,6 +97,9 @@ export class CatDetailComponent implements OnInit {
       next: (res) => {
         this.cat.set(res.data);
         this.loading.set(false);
+        if (this.authService.isAuthenticated() && !this.isOwner()) {
+          this.loadFavouriteStatus();
+        }
       },
       error: () => {
         this.loading.set(false);
@@ -101,11 +108,50 @@ export class CatDetailComponent implements OnInit {
     });
   }
 
-  onUploadImages(files: File[]): void {
+  private loadFavouriteStatus(): void {
+    this.favouritesService.getFavourites().subscribe({
+      next: (res) => {
+        const match = res.data.results.find((f) => f.cat.id === this.catId);
+        this.favouriteId.set(match?.id ?? null);
+      },
+      error: () => {},
+    });
+  }
+
+  toggleFavourite(): void {
+    if (this.favLoading()) return;
+    this.favLoading.set(true);
+    const existing = this.favouriteId();
+    if (existing !== null) {
+      this.favouritesService.removeFavourite(existing).subscribe({
+        next: () => {
+          this.favouriteId.set(null);
+          this.favLoading.set(false);
+        },
+        error: () => {
+          this.favLoading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось убрать из избранного' });
+        },
+      });
+    } else {
+      this.favouritesService.addFavourite(this.catId).subscribe({
+        next: (res) => {
+          this.favouriteId.set(res.data.id);
+          this.favLoading.set(false);
+        },
+        error: () => {
+          this.favLoading.set(false);
+          this.messageService.add({ severity: 'error', summary: 'Ошибка', detail: 'Не удалось добавить в избранное' });
+        },
+      });
+    }
+  }
+
+  onUploadImages({ files, isMain }: { files: File[]; isMain: boolean }): void {
     this.uploadLoading.set(true);
     let completed = 0;
     for (const file of files) {
-      this.catsService.uploadImage(this.catId, file).subscribe({
+      this.catsService.uploadImage(this.catId, file, isMain).subscribe({
         next: () => {
           completed++;
           if (completed === files.length) {

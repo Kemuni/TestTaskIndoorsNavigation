@@ -219,11 +219,11 @@ export class CatFormComponent implements OnInit {
     });
   }
 
-  onUploadImages(files: File[]): void {
+  onUploadImages({ files, isMain }: { files: File[]; isMain: boolean }): void {
     const cat = this.savedCat();
     if (!cat) return;
     for (const file of files) {
-      this.catsService.uploadImage(cat.id, file).subscribe({
+      this.catsService.uploadImage(cat.id, file, isMain).subscribe({
         next: (res) => {
           this.savedCat.update((c) => (c ? { ...c, images: res.data } : c));
         },

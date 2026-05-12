@@ -25,6 +25,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.1.0",
     "http-proxy-middleware": "^4.0.0",
+    "primeicons": "^7.0.0",
     "primeng": "^21.1.6",
     "rxjs": "~7.8.0",
     "tailwindcss-primeui": "^0.6.1",

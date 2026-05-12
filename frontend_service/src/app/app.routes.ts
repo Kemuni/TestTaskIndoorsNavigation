@@ -116,5 +116,14 @@ export const routes: Routes = [
     ],
   },
 
+  {
+    path: 'favourites',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/favourites/favourites.component').then(
+        (m) => m.FavouritesComponent,
+      ),
+  },
+
   { path: '**', redirectTo: 'cats' },
 ];

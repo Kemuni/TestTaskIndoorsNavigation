@@ -17,7 +17,7 @@
     </div>
   </main>
 } @else if (error()) {
-  <main class="max-w-4xl mx-auto px-4 py-16 text-center text-slate-400">
+  <main class="max-w-4xl mx-auto px-4 py-16 text-center">
     <div class="text-6xl mb-4" aria-hidden="true">⚠️</div>
     <p class="text-lg font-medium text-slate-600">Не удалось загрузить объявление</p>
     <p class="text-sm mt-1">Сервер недоступен — попробуйте позже</p>
@@ -158,13 +158,13 @@
             <a
               [routerLink]="['/cats', cat()!.id, 'edit']"
               class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
-              style="color: #fff;"
+
             >
               <i class="pi pi-pencil" aria-hidden="true"></i>
               Редактировать
             </a>
             <p-button
-              icon="pi pi-trash"
+              icon="pi pi-trash text-white"
               severity="danger"
               (onClick)="onDelete()"
               aria-label="Удалить объявление"
@@ -177,6 +177,13 @@
               <i class="pi pi-comments" aria-hidden="true"></i>
               Написать
             </a>
+            <p-button
+              [icon]="favouriteId() !== null ? 'pi pi-heart-fill' : 'pi pi-heart'"
+              [severity]="favouriteId() !== null ? 'danger' : 'secondary'"
+              [loading]="favLoading()"
+              (onClick)="toggleFavourite()"
+              [attr.aria-label]="favouriteId() !== null ? 'Убрать из избранного' : 'Добавить в избранное'"
+            />
           }
         </div>
       </div>

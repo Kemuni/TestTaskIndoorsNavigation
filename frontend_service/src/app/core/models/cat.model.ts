@@ -95,7 +95,7 @@ export const GENDER_LABELS: Record<GenderEnum, string> = {
 };
 
 export const STATUS_LABELS: Record<StatusEnum, string> = {
-  FOR_DEMONSTRATION: 'Только показ',
+  FOR_DEMONSTRATION: 'Для показа',
   AWAITING_OWNER: 'Ищет хозяина',
   GIVEN_AWAY: 'Отдан',
   CLOSED: 'Закрыто',

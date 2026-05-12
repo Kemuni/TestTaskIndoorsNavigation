@@ -22,7 +22,7 @@ import { MenuItem } from 'primeng/api';
           class="flex items-center gap-2 text-xl font-bold text-gray-900 shrink-0"
           aria-label="CatPost — на главную"
         >
-          🐱 CatPost
+          ТвояКошка
         </a>
 
         <!-- Nav links (desktop) -->
@@ -44,6 +44,15 @@ import { MenuItem } from 'primeng/api';
                 class="px-3 py-2 rounded-lg text-sm hover:bg-slate-100 transition-colors"
               >
                 Диалоги
+              </a>
+            </li>
+            <li>
+              <a
+                routerLink="/favourites"
+                routerLinkActive="text-gray-900 font-semibold"
+                class="px-3 py-2 rounded-lg text-sm hover:bg-slate-100 transition-colors"
+              >
+                Избранное
               </a>
             </li>
           }
@@ -126,6 +135,13 @@ import { MenuItem } from 'primeng/api';
               (click)="mobileMenuOpen.set(false)"
               role="menuitem"
             >Диалоги</a>
+            <a
+              routerLink="/favourites"
+              routerLinkActive="font-semibold"
+              class="py-2 px-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+              (click)="mobileMenuOpen.set(false)"
+              role="menuitem"
+            >Избранное</a>
             <a
               routerLink="/cats/new"
               class="py-2 px-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
