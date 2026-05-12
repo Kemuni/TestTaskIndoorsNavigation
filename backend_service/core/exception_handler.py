@@ -2,7 +2,7 @@ import logging
 
 from django.db import IntegrityError
 from rest_framework import status, exceptions as exceptions_drf
-from rest_framework.exceptions import ValidationError, APIException
+from rest_framework.exceptions import ValidationError, APIException, NotFound
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -54,6 +54,11 @@ def exception_handler(exc, context):
         error_details["code"] = "PERMISSION_DENIED"
         error_details["message"] = "You do not have permission for this."
         http_status_code = status.HTTP_403_FORBIDDEN
+
+    elif isinstance(exc, NotFound):
+        error_details["code"] = "NOT_FOUND"
+        error_details["message"] = str(exc)
+        http_status_code = status.HTTP_404_NOT_FOUND
 
     elif isinstance(exc, exceptions_drf.APIException):
         error_details["code"] = error_details["message"] = str(exc.__class__.__name__)
