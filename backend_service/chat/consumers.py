@@ -1,11 +1,14 @@
 import enum
 import json
 import logging
+from datetime import datetime
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 
+from chat.exceptions import IncorrectMessageBody
 from chat.models import Message, Dialog
 
 User = get_user_model()
@@ -25,9 +28,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
     receiver_user_id: int
 
 
-    class MessageType(str, enum.Enum):
+    class ActionType(str, enum.Enum):
         """ Различные типы сообщений вебсокета """
-        CHAT_MESSAGE = "chat_message"
+        SEND_MESSAGE = "send_message"
+        READ_MESSAGES = "read_messages"
 
 
     async def connect(self):
@@ -54,6 +58,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
     async def receive(self, text_data = None, **_):
+        """
+        Обработка запросов. Существуют следующие типы:
+        SEND_MESSAGE - Отправка сообщений.
+        READ_MESSAGES - Чтение сообщений.
+        """
         try:
             text_data_json = json.loads(text_data)
         except json.JSONDecodeError as e:
@@ -61,42 +70,59 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send_error('Invalid JSON')
             return
 
-        message_text = text_data_json.get('message', None)
-        if message_text is None:
-            await self.send_error("Body of message is empty. Message text is required")
-            return
-        if len(message_text) > self.MAX_MESSAGE_LENGTH:
-            await self.send_error(f"Message text is too long. Max length is {self.MAX_MESSAGE_LENGTH} characters")
-            return
-
         try:
-            message_obj = await self.save_message(
-                sender_user_id=self.user.id,
-                receiver_user_id=self.receiver_user_id,
-                message_text=message_text,
-            )
-        except Exception as e:
-            logger.error(f'Не удалось создать сообщение: {e}', exc_info=True)
-            await self.send_error('Unknown error. Failed to create message')
+            action_type = self.parse_action_type(text_data_json)
+            if action_type == self.ActionType.SEND_MESSAGE:
+                message_text = self.parse_message_text(text_data_json)
+                message_obj = await self.save_message(
+                    sender_user_id=self.user.id,
+                    receiver_user_id=self.receiver_user_id,
+                    message_text=message_text,
+                )
+                result = {
+                    'message': {
+                        'id': message_obj.id,
+                        'sender_id': self.user.id,
+                        'content': message_obj.content,
+                    }
+                }
+            elif action_type == self.ActionType.READ_MESSAGES:
+                message_ids = self.parse_message_ids(text_data_json)
+                await self.validate_messages_ids(message_ids)
+                await self.mark_messages_as_read(message_ids)
+                result = {
+                    'message_ids': message_ids
+                }
+            else:
+                await self.send('Unknown action type')
+                return
+        except IncorrectMessageBody as exc:
+            logger.error(f'Не удалось сообщение: {exc}', exc_info=True)
+            await self.send_error(str(exc))
             return
 
         await self.channel_layer.group_send(
             self.room_name,
             {
-                'type': self.MessageType.CHAT_MESSAGE,
-                'message': {
-                    'id': message_obj.id,
-                    'sender_id': self.user.id,
-                    'content': message_obj.content,
-                }
+                'type': action_type,
+                **result,
             }
         )
 
-    async def chat_message(self, event):
-        """ Обрабатываем сообщения в группу типа `chat_message` """
+    async def send_message(self, event):
+        """ Обрабатываем сообщения в группу типа `send_message` """
         await self.send(text_data=json.dumps({
             'success': True,
+            'action': str(self.ActionType.SEND_MESSAGE),
             'message': event['message'],
+        }))
+
+    async def read_messages(self, event):
+        """ Обрабатываем сообщения в группу типа `read_messages` """
+        await self.send(text_data=json.dumps({
+            'success': True,
+            'action': str(self.ActionType.READ_MESSAGES),
+            'message_ids': event['message_ids'],
         }))
 
     async def send_error(self, error_msg: str):
@@ -106,25 +132,93 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'error': error_msg,
         }))
 
+    def parse_action_type(self, data: dict) -> ActionType:
+        """ Парсим тип активности в enum и возвращаем его """
+        action_type_str = data.get('type', None)
+        if action_type_str is None:
+            raise IncorrectMessageBody(f"Action type is required")
+
+        try:
+            return self.ActionType(action_type_str.lower())
+        except ValueError:
+            raise IncorrectMessageBody(f"Incorrect action type. Available is {', '.join(i.value for i in self.ActionType)}")
+
+    @staticmethod
+    def parse_message_ids(data: dict) -> list[int]:
+        """ Парсим из тела запроса ID сообщений """
+        message_ids = data.get('message_ids', None)
+        if not isinstance(message_ids, list):
+            raise IncorrectMessageBody("`message_ids` is required and must be a list of numbers")
+
+        for i in range(len(message_ids)):
+            try:
+                message_ids[i] = int(message_ids[i])
+            except ValueError:
+                raise IncorrectMessageBody(f"Message id {message_ids[i]} must be a number")
+
+        if len(set(message_ids)) != len(message_ids):
+            raise IncorrectMessageBody(f"Message ids are not unique")
+
+        return message_ids
+
+    def parse_message_text(self, data: dict) -> str:
+        """ Парсим из тела запроса тело сообщения """
+        message_text = data.get('message', None)
+        if message_text is None:
+            raise IncorrectMessageBody("Body of message is empty. Message text is required")
+        if len(message_text) > self.MAX_MESSAGE_LENGTH:
+            raise IncorrectMessageBody(f"Message text is too long. Max length is {self.MAX_MESSAGE_LENGTH} characters")
+        return message_text
+
+    @database_sync_to_async
+    def validate_messages_ids(self, message_ids: list[int]) -> None:
+        """ Валидируем, что в БД существуют такие ID сообщений и они принадлежат текущему чату """
+        user_1_id, user_2_id = self.get_user1_and_user2_ids(self.user.id, self.receiver_user_id)
+        messages_amount = (
+            Message.objects
+            .select_related('dialog')
+            .filter(
+                id__in=message_ids,
+                dialog__user_1_id=user_1_id,
+                dialog__user_2_id=user_2_id,
+            )
+            .count()
+        )
+        if messages_amount != len(message_ids):
+            raise IncorrectMessageBody(f"You can read only yours messages")
+
     @staticmethod
     @database_sync_to_async
-    def save_message(sender_user_id: int, receiver_user_id: int, message_text: str) -> Message:
-        if sender_user_id < receiver_user_id:
-            user_1_id, user_2_id = sender_user_id, receiver_user_id
-        else:
-            user_1_id, user_2_id = receiver_user_id, sender_user_id
+    def mark_messages_as_read(message_ids: list[int]) -> None:
+        """ Помечаем в БД, что сообщения прочитаны """
+        Message.objects.filter(id__in=message_ids).update(read_at=datetime.now())
+
+    @database_sync_to_async
+    def save_message(self, sender_user_id: int, receiver_user_id: int, message_text: str) -> Message:
+        """ Сохраняем новое сообщение в БД """
+        user_1_id, user_2_id = self.get_user1_and_user2_ids(receiver_user_id, sender_user_id)
 
         dialog, created = Dialog.objects.get_or_create(user_1_id=user_1_id, user_2_id=user_2_id)
         if created:
             logger.info(f'Создан диалог (ID={dialog.id}) между {user_1_id} и {user_2_id}')
 
-        message_obj = Message.objects.create(
-            dialog=dialog,
-            sender_id=sender_user_id,
-            content=message_text,
-        )
+        try:
+            message_obj = Message.objects.create(
+                dialog=dialog,
+                sender_id=sender_user_id,
+                content=message_text,
+            )
+        except IntegrityError:
+            raise IncorrectMessageBody('Unknown error. Failed to create message')
 
         return message_obj
+
+    @staticmethod
+    def get_user1_and_user2_ids(first_id: int, second_id: int) -> tuple[int, int]:
+        if first_id < second_id:
+            return first_id, second_id
+        else:
+            return second_id, first_id
 
 
     @staticmethod
