@@ -32,6 +32,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """ Различные типы сообщений вебсокета """
         SEND_MESSAGE = "send_message"
         READ_MESSAGES = "read_messages"
+        DELETE_MESSAGES = "delete_messages"
 
 
     async def connect(self):
@@ -88,8 +89,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             elif action_type == self.ActionType.READ_MESSAGES:
                 message_ids = self.parse_message_ids(text_data_json)
-                await self.validate_messages_ids(message_ids)
+                await self.validate_messages_ids(message_ids=message_ids)
                 await self.mark_messages_as_read(message_ids)
+                result = {
+                    'message_ids': message_ids
+                }
+            elif action_type == self.ActionType.DELETE_MESSAGES:
+                message_ids = self.parse_message_ids(text_data_json)
+                await self.validate_messages_ids(message_ids=message_ids)
+                await self.delete_messages_in_db(message_ids)
                 result = {
                     'message_ids': message_ids
                 }
@@ -122,6 +130,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'success': True,
             'action': str(self.ActionType.READ_MESSAGES),
+            'message_ids': event['message_ids'],
+        }))
+
+    async def delete_messages(self, event):
+        """ Обрабатываем сообщения в группу типа `delete_messages` """
+        await self.send(text_data=json.dumps({
+            'success': True,
+            'action': str(self.ActionType.DELETE_MESSAGES),
             'message_ids': event['message_ids'],
         }))
 
@@ -185,13 +201,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
             .count()
         )
         if messages_amount != len(message_ids):
-            raise IncorrectMessageBody(f"You can read only yours messages")
+            raise IncorrectMessageBody(f"There are no some messages with such Id or you try to edit someone else message")
 
     @staticmethod
     @database_sync_to_async
     def mark_messages_as_read(message_ids: list[int]) -> None:
         """ Помечаем в БД, что сообщения прочитаны """
         Message.objects.filter(id__in=message_ids).update(read_at=datetime.now())
+
+
+    @staticmethod
+    @database_sync_to_async
+    def delete_messages_in_db(message_ids: list[int]) -> None:
+        """ Удаляем сообщения из БД """
+        Message.objects.filter(id__in=message_ids).delete()
 
     @database_sync_to_async
     def save_message(self, sender_user_id: int, receiver_user_id: int, message_text: str) -> Message:
