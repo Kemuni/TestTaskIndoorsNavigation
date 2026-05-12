@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TagModule } from 'primeng/tag';
 import { CatRead, GENDER_LABELS, STATUS_LABELS, STATUS_SEVERITY } from '../../../core/models/cat.model';
@@ -13,10 +13,10 @@ import { CatRead, GENDER_LABELS, STATUS_LABELS, STATUS_SEVERITY } from '../../..
       [attr.aria-label]="'Объявление: ' + cat().name"
     >
       <!-- Image -->
-      <a [routerLink]="['/cats', cat().id]" class="block aspect-[4/3] overflow-hidden bg-slate-100">
-        @if (mainImage()) {
+      <a [routerLink]="['/cats', cat().id]" class="block aspect-[4/3] overflow-hidden bg-slate-100 relative">
+        @if (displayImage()) {
           <img
-            [src]="mainImage()!.image_url"
+            [src]="displayImage()!.image_url"
             [alt]="'Фото ' + cat().name"
             class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             loading="lazy"
@@ -30,6 +30,16 @@ import { CatRead, GENDER_LABELS, STATUS_LABELS, STATUS_SEVERITY } from '../../..
             <span class="text-sm mt-2">Нет фото</span>
           </div>
         }
+        @if (cat().images.length > 1) {
+          <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1" aria-hidden="true">
+            @for (img of cat().images; track img.id; let i = $index) {
+              <span
+                class="w-1.5 h-1.5 rounded-full transition-colors"
+                [class]="i === activeIndex() ? 'bg-white' : 'bg-white/50'"
+              ></span>
+            }
+          </div>
+        }
       </a>
 
       <!-- Content -->
@@ -37,7 +47,7 @@ import { CatRead, GENDER_LABELS, STATUS_LABELS, STATUS_SEVERITY } from '../../..
         <div class="flex items-start justify-between gap-2">
           <a
             [routerLink]="['/cats', cat().id]"
-            class="text-base font-semibold text-slate-900 hover:text-violet-700 transition-colors line-clamp-1"
+            class="text-base font-semibold text-slate-900 hover:text-gray-700 transition-colors line-clamp-1"
           >
             {{ cat().name }}
           </a>
@@ -58,13 +68,13 @@ import { CatRead, GENDER_LABELS, STATUS_LABELS, STATUS_SEVERITY } from '../../..
 
         <div class="mt-auto pt-2 flex items-center justify-between">
           @if (cat().price) {
-            <span class="text-base font-bold text-violet-700">{{ cat().price }} ₽</span>
+            <span class="text-base font-bold text-gray-900">{{ cat().price }} ₽</span>
           } @else {
             <span class="text-base font-semibold text-green-600">Бесплатно</span>
           }
           <a
             [routerLink]="['/profile', cat().owner.id]"
-            class="text-xs text-slate-400 hover:text-violet-600 transition-colors"
+            class="text-xs text-slate-400 hover:text-gray-700 transition-colors"
           >
             {{ cat().owner.first_name }} {{ cat().owner.last_name }}
           </a>
@@ -73,13 +83,29 @@ import { CatRead, GENDER_LABELS, STATUS_LABELS, STATUS_SEVERITY } from '../../..
     </article>
   `,
 })
-export class CatCardComponent {
+export class CatCardComponent implements OnInit, OnDestroy {
   readonly cat = input.required<CatRead>();
 
-  readonly mainImage = computed(() => {
+  private intervalId: ReturnType<typeof setInterval> | null = null;
+  readonly activeIndex = signal(0);
+
+  readonly displayImage = computed(() => {
     const images = this.cat().images;
-    return images.find((i) => i.is_main) ?? images[0] ?? null;
+    if (!images.length) return null;
+    return images[this.activeIndex()] ?? images[0];
   });
+
+  ngOnInit(): void {
+    if (this.cat().images.length > 1) {
+      this.intervalId = setInterval(() => {
+        this.activeIndex.update((i) => (i + 1) % this.cat().images.length);
+      }, 3000);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.intervalId !== null) clearInterval(this.intervalId);
+  }
 
   readonly statusLabel = computed(() => STATUS_LABELS[this.cat().status]);
   readonly statusSeverity = computed(() => STATUS_SEVERITY[this.cat().status] as 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast');

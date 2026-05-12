@@ -27,7 +27,7 @@ import { CatImage } from '../../../core/models/cat.model';
           />
           @if (activeImage()!.is_main) {
             <span
-              class="absolute top-2 left-2 bg-violet-600 text-white text-xs px-2 py-0.5 rounded-full"
+              class="absolute top-2 left-2 bg-gray-900 text-white text-xs px-2 py-0.5 rounded-full"
               aria-label="Главное фото"
             >
               Главное
@@ -52,7 +52,7 @@ import { CatImage } from '../../../core/models/cat.model';
             <button
               type="button"
               class="shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors"
-              [class]="activeId() === img.id ? 'border-violet-600' : 'border-transparent hover:border-slate-300'"
+              [class]="activeId() === img.id ? 'border-gray-900' : 'border-transparent hover:border-slate-300'"
               (click)="activeId.set(img.id)"
               [attr.aria-label]="'Фото ' + ($index + 1)"
               [attr.aria-pressed]="activeId() === img.id"
@@ -78,7 +78,7 @@ import { CatImage } from '../../../core/models/cat.model';
               type="file"
               accept="image/*"
               multiple
-              class="block w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 cursor-pointer"
+              class="block w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
               aria-label="Выберите фото для загрузки"
               (change)="onFileChange(fileInput.files)"
             />

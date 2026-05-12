@@ -11,6 +11,7 @@ import { ImageGalleryComponent } from '../../../shared/components/image-gallery/
 import { CatsService } from '../../../core/services/cats.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { CatRead, GENDER_LABELS, STATUS_LABELS, STATUS_SEVERITY } from '../../../core/models/cat.model';
+import { HAIR_TYPE_LABELS } from '../../../core/models/breed.model';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -46,6 +47,8 @@ export class CatDetailComponent implements OnInit {
   readonly error = signal(false);
   readonly uploadLoading = signal(false);
 
+  readonly hairTypeLabels = HAIR_TYPE_LABELS;
+
   readonly isOwner = computed(() => {
     const user = this.authService.currentUser();
     const cat = this.cat();
@@ -77,6 +80,10 @@ export class CatDetailComponent implements OnInit {
     return rem ? `${years} г. ${rem} мес.` : `${years} г.`;
   });
 
+  formatBirthday(dateStr: string): string {
+    return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(dateStr));
+  }
+
   private get catId(): number {
     return Number(this.route.snapshot.paramMap.get('id'));
   }
@@ -99,10 +106,12 @@ export class CatDetailComponent implements OnInit {
     let completed = 0;
     for (const file of files) {
       this.catsService.uploadImage(this.catId, file).subscribe({
-        next: (res) => {
-          this.cat.update((c) => (c ? { ...c, images: res.data } : c));
+        next: () => {
           completed++;
-          if (completed === files.length) this.uploadLoading.set(false);
+          if (completed === files.length) {
+            this.uploadLoading.set(false);
+            this.reload();
+          }
         },
         error: () => {
           completed++;

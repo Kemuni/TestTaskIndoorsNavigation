@@ -1,16 +1,19 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, signal } from '@angular/core';
+import { AbstractControl, AsyncValidatorFn, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AuthService } from '../../../core/services/auth.service';
+import { UsersService } from '../../../core/services/users.service';
+import { debounceTime, distinctUntilChanged, map, Observable, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-register',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink, InputTextModule, PasswordModule, ButtonModule, MessageModule],
+  imports: [ReactiveFormsModule, RouterLink, InputTextModule, PasswordModule, ButtonModule, MessageModule, ProgressSpinnerModule],
   template: `
     <main class="min-h-screen flex items-center justify-center p-4 bg-slate-50">
       <div class="w-full max-w-sm">
@@ -86,7 +89,13 @@ import { AuthService } from '../../../core/services/auth.service';
               [attr.aria-invalid]="fieldInvalid('email')"
               aria-describedby="reg-email-error"
             />
-            @if (fieldInvalid('email')) {
+            @if (form.controls.email.pending) {
+              <span class="text-xs text-slate-500 flex items-center gap-1">
+                <i class="pi pi-spin pi-spinner text-xs" aria-hidden="true"></i> Проверяем...
+              </span>
+            } @else if (form.controls.email.hasError('emailTaken')) {
+              <span id="reg-email-error" class="text-xs text-red-600" role="alert">Email уже занят</span>
+            } @else if (fieldInvalid('email')) {
               <span id="reg-email-error" class="text-xs text-red-600" role="alert">
                 Введите корректный email
               </span>
@@ -123,7 +132,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
         <p class="text-center text-sm text-slate-500 mt-4">
           Уже есть аккаунт?
-          <a routerLink="/auth/login" class="text-violet-600 hover:underline font-medium">
+          <a routerLink="/auth/login" class="text-gray-900 hover:underline font-medium">
             Войти
           </a>
         </p>
@@ -134,21 +143,33 @@ import { AuthService } from '../../../core/services/auth.service';
 export class RegisterComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly usersService = inject(UsersService);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
+  private emailTakenValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      return control.valueChanges.pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        switchMap((value: string) => this.usersService.checkEmailFree(value)),
+        map((res) => (res.data.is_free ? null : { emailTaken: true })),
+      );
+    };
+  }
+
   readonly form = this.fb.nonNullable.group({
     first_name: ['', Validators.required],
     last_name: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
+    email: ['', [Validators.required, Validators.email], [this.emailTakenValidator()]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
   fieldInvalid(field: keyof typeof this.form.controls): boolean {
     const ctrl = this.form.controls[field];
-    return ctrl.invalid && ctrl.touched;
+    return ctrl.invalid && ctrl.touched && !ctrl.pending;
   }
 
   onSubmit(): void {

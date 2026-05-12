@@ -71,7 +71,11 @@
             aria-required="true"
           />
           @if (fieldInvalid('birthday')) {
-            <span class="text-xs text-red-600" role="alert">Укажите дату рождения</span>
+            @if (form.controls.birthday.errors?.['required']) {
+              <span class="text-xs text-red-600" role="alert">Укажите дату рождения</span>
+            } @else if (form.controls.birthday.errors?.['futureDate']) {
+              <span class="text-xs text-red-600" role="alert">Дата рождения не может быть в будущем</span>
+            }
           }
         </div>
       </div>
@@ -129,11 +133,15 @@
             [minFractionDigits]="2"
             [maxFractionDigits]="2"
             [min]="0.01"
+            [max]="30"
             placeholder="3.50"
             styleClass="w-full"
             inputStyleClass="w-full"
             aria-required="true"
           />
+          @if (fieldInvalid('current_weight')) {
+            <span class="text-xs text-red-600" role="alert">Укажите вес от 0.01 до 30 кг</span>
+          }
         </div>
         <div class="flex flex-col gap-1">
           <label for="cat-bw" class="text-sm font-medium text-slate-700">
@@ -145,13 +153,20 @@
             [minFractionDigits]="2"
             [maxFractionDigits]="2"
             [min]="0.01"
+            [max]="10"
             placeholder="0.10"
             styleClass="w-full"
             inputStyleClass="w-full"
             aria-required="true"
           />
+          @if (fieldInvalid('birth_weight')) {
+            <span class="text-xs text-red-600" role="alert">Укажите вес от 0.01 до 10 кг</span>
+          }
         </div>
       </div>
+      @if (weightsCrossError()) {
+        <span class="text-xs text-red-600 -mt-3" role="alert">Вес при рождении должен быть меньше текущего веса</span>
+      }
 
       <!-- Status + Price -->
       <div class="grid grid-cols-2 gap-4">
@@ -212,26 +227,84 @@
       <!-- Parents -->
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
-          <label for="cat-mother" class="text-sm font-medium text-slate-700">ID матери (необязательно)</label>
-          <p-inputnumber
+          <label for="cat-mother" class="text-sm font-medium text-slate-700">Мать (необязательно)</label>
+          <p-select
             inputId="cat-mother"
             formControlName="mother_id"
-            [showButtons]="false"
-            placeholder="ID кошки"
+            [options]="motherOptions()"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Выберите мать"
             styleClass="w-full"
-            inputStyleClass="w-full"
-          />
+            appendTo="body"
+            [showClear]="true"
+          >
+            <ng-template pTemplate="empty">
+              <div class="p-2 text-center text-gray-500">
+                Нет доступных вариантов для отображения
+              </div>
+            </ng-template>
+            <ng-template #item let-opt>
+              <div class="flex items-center gap-2">
+                @if (opt.imageUrl) {
+                  <img [src]="opt.imageUrl" [alt]="opt.label" class="w-7 h-7 rounded-full object-cover" />
+                } @else {
+                  <span class="w-7 h-7 flex items-center justify-center text-xl" aria-hidden="true">🐱</span>
+                }
+                <span>{{ opt.label }}</span>
+              </div>
+            </ng-template>
+            <ng-template #selectedItem let-opt>
+              <div class="flex items-center gap-2">
+                @if (opt.imageUrl) {
+                  <img [src]="opt.imageUrl" [alt]="opt.label" class="w-5 h-5 rounded-full object-cover" />
+                } @else {
+                  <span aria-hidden="true">🐱</span>
+                }
+                <span>{{ opt.label }}</span>
+              </div>
+            </ng-template>
+          </p-select>
         </div>
         <div class="flex flex-col gap-1">
-          <label for="cat-father" class="text-sm font-medium text-slate-700">ID отца (необязательно)</label>
-          <p-inputnumber
+          <label for="cat-father" class="text-sm font-medium text-slate-700">Отец (необязательно)</label>
+          <p-select
             inputId="cat-father"
             formControlName="father_id"
-            [showButtons]="false"
-            placeholder="ID кота"
+            [options]="fatherOptions()"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Выберите отца"
             styleClass="w-full"
-            inputStyleClass="w-full"
-          />
+            appendTo="body"
+            [showClear]="true"
+          >
+            <ng-template pTemplate="empty">
+              <div class="p-2 text-center text-gray-500">
+                Нет доступных вариантов для отображения
+              </div>
+            </ng-template>
+            <ng-template #item let-opt>
+              <div class="flex items-center gap-2">
+                @if (opt.imageUrl) {
+                  <img [src]="opt.imageUrl" [alt]="opt.label" class="w-7 h-7 rounded-full object-cover" />
+                } @else {
+                  <span class="w-7 h-7 flex items-center justify-center text-xl" aria-hidden="true">🐱</span>
+                }
+                <span>{{ opt.label }}</span>
+              </div>
+            </ng-template>
+            <ng-template #selectedItem let-opt>
+              <div class="flex items-center gap-2">
+                @if (opt.imageUrl) {
+                  <img [src]="opt.imageUrl" [alt]="opt.label" class="w-5 h-5 rounded-full object-cover" />
+                } @else {
+                  <span aria-hidden="true">🐱</span>
+                }
+                <span>{{ opt.label }}</span>
+              </div>
+            </ng-template>
+          </p-select>
         </div>
       </div>
 

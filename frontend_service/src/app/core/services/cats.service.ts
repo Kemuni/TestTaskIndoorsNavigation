@@ -48,4 +48,12 @@ export class CatsService {
   getCatsByBreed(breedId: number): Observable<ApiResponse<CatRead[]>> {
     return this.http.get<ApiResponse<CatRead[]>>(`/api/breed/${breedId}/cats/`);
   }
+
+  getMyCats(): Observable<PaginatedResponse<CatRead>> {
+    return this.http.get<PaginatedResponse<CatRead>>('/api/cat/my/');
+  }
+
+  getCatsByUser(userId: number): Observable<PaginatedResponse<CatRead>> {
+    return this.http.get<PaginatedResponse<CatRead>>(`/api/cat/by-user/${userId}/`);
+  }
 }
