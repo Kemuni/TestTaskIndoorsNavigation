@@ -42,7 +42,7 @@ def exception_handler(exc, context):
     elif isinstance(exc, IntegrityError):
         # Ошибки базы данных
         error_details["code"] = "DATABASE_INTEGRITY_ERROR"
-        error_details["message"] = str(exc)
+        error_details["message"] = "Something went wrong. Try again later."
         http_status_code = status.HTTP_409_CONFLICT
 
     elif isinstance(exc, exceptions_drf.PermissionDenied):
