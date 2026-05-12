@@ -83,7 +83,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
         <p class="text-center text-sm text-slate-500 mt-4">
           Нет аккаунта?
-          <a routerLink="/auth/register" class="text-violet-600 hover:underline font-medium">
+          <a routerLink="/auth/register" class="text-gray-900 hover:underline font-medium">
             Зарегистрироваться
           </a>
         </p>

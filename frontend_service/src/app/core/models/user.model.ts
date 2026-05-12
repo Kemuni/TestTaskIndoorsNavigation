@@ -3,6 +3,12 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
+  image_url: string | null;
+}
+
+export interface UpdateUserData {
+  first_name: string;
+  last_name: string;
 }
 
 export interface UserWithTokens {

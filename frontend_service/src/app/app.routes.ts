@@ -102,5 +102,19 @@ export const routes: Routes = [
     ],
   },
 
+  {
+    path: 'chat',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: ':userId',
+        loadComponent: () =>
+          import('./features/chat/direct-chat/direct-chat.component').then(
+            (m) => m.DirectChatComponent,
+          ),
+      },
+    ],
+  },
+
   { path: '**', redirectTo: 'cats' },
 ];

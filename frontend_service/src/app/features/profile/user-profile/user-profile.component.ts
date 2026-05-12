@@ -24,7 +24,7 @@ import { AvatarModule } from 'primeng/avatar';
           [label]="initials()"
           shape="circle"
           size="xlarge"
-          styleClass="bg-violet-100 text-violet-700 font-bold text-2xl w-20 h-20 shrink-0"
+          styleClass="bg-gray-100 text-gray-700 font-bold text-2xl w-20 h-20 shrink-0"
           aria-hidden="true"
         />
         <div>
