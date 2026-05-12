@@ -192,7 +192,7 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         return CatReadSerializer
 
     def get_permissions(self):
-        if self.action == 'my':
+        if self.action in ('my', 'delete_image'):
             return [permissions.IsAuthenticated()]
         if self.action in ('list', 'retrieve'):
             return [permissions.AllowAny()]
@@ -394,7 +394,10 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         tags=[SCHEMA_TAG],
     )
     @action(detail=True, methods=['delete'], url_path='images/(?P<image_id>[^/.]+)')
-    def delete_image(self, _, pk=None, image_id=None):
+    def delete_image(self, request, pk=None, image_id=None):
+        if not IsCatOwnerOrReadWriteOnly().has_object_permission(request, self, request.user):
+            raise PermissionDenied(IsCatOwnerOrReadWriteOnly.message)
+
         # Валидация ID
         if image_id is None:
             raise ValidationError('`image_id` in the URL must be an integer')
