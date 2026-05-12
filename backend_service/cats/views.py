@@ -1,32 +1,35 @@
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
-from rest_framework import viewsets, status, mixins, permissions
+from rest_framework import viewsets, status, permissions, mixins
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from cats.filters import CatFilterSet
-from cats.models import Breed, Cat, CatImage
+from cats.models import Breed, Cat, CatImage, FavouriteCat
 from cats.permissions import IsCatOwnerOrReadWriteOnly
 from cats.serializers import (
     BreedSerializer,
-    BreedListResponseSerializer,
     BreedResponseSerializer,
     CatReadSerializer,
-    CatListResponseSerializer,
     CatWriteSerializer,
     CatResponseSerializer,
     CatImageUploadSerializer,
     CatImageSerializer,
     CatImageResponseSerializer,
+    ReadFavouriteCatSerializer, FavouriteCatRequestSerializer, FavouriteCatResponseSerializer,
 )
+from core.exceptions import BadRequest
 from core.mixins import BaseResponseDataFormatMixin
 from core.permissions import IsAdminOrReadOnly
 from core.utils.api_schema_responses import get_default_schema_responses
+from core.utils.validate_id import validate_id
 
 User = get_user_model()
 
@@ -51,7 +54,7 @@ class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         summary="Получение списка пород кошек",
         description="Получение списка пород кошек",
         responses={
-            200: OpenApiResponse(response=BreedListResponseSerializer, description="Данные о породах"),
+            200: OpenApiResponse(response=BreedSerializer(many=True), description="Данные о породах"),
             **get_default_schema_responses(),
         },
         tags=[SCHEMA_TAG],
@@ -83,7 +86,7 @@ class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
             OpenApiParameter('id', description='ID породы кошки', required=True, type=int, location='path')
         ],
         responses={
-            200: OpenApiResponse(response=CatListResponseSerializer,
+            200: OpenApiResponse(response=CatReadSerializer(many=True),
                                  description="Данные о кошек с определенной породой"),
             **get_default_schema_responses(),
         },
@@ -92,14 +95,7 @@ class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
     )
     @action(detail=True, methods=['get'])
     def cats(self, _, pk=None):
-        if pk is None:
-            raise ValidationError('`id` in the URL must be an integer')
-        try:
-            breed_id = int(pk)
-        except ValueError:
-            raise ValidationError('`id` in the URL must be integer and greater than zero')
-        if breed_id <= 0:
-            raise ValidationError('`id` in the URL must be greater than zero')
+        breed_id = validate_id(pk, 'id')
 
         queryset = (Cat.objects
                     .filter(breed__id=breed_id)
@@ -194,7 +190,7 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ('my', 'delete_image'):
             return [permissions.IsAuthenticated()]
-        if self.action in ('list', 'retrieve'):
+        if self.action in ('list', 'retrieve', 'user_cats'):
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated(), IsCatOwnerOrReadWriteOnly()]
 
@@ -202,7 +198,7 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         summary="Получение списка объявления кошек",
         description="Получение списка объявления кошек",
         responses={
-            200: OpenApiResponse(response=CatListResponseSerializer, description="Данные о объявления кошек"),
+            200: OpenApiResponse(response=CatReadSerializer(many=True), description="Данные о объявления кошек"),
             **get_default_schema_responses(),
         },
         tags=[SCHEMA_TAG],
@@ -231,7 +227,7 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         summary="Получение кошек текущего пользователя",
         description="Получение кошек текущего пользователя",
         responses={
-            200: OpenApiResponse(response=CatListResponseSerializer, description="Данные о кошах"),
+            200: OpenApiResponse(response=CatReadSerializer(many=True), description="Данные о кошах"),
             **get_default_schema_responses(),
         },
         tags=[SCHEMA_TAG],
@@ -253,7 +249,7 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
             OpenApiParameter('user_id', description='ID пользователя', required=True, type=int, location='path')
         ],
         responses={
-            200: OpenApiResponse(response=CatListResponseSerializer, description="Список кошек пользователя"),
+            200: OpenApiResponse(response=CatReadSerializer(many=True), description="Список кошек пользователя"),
             404: OpenApiResponse(description="Пользователь не найден"),
             **get_default_schema_responses(),
         },
@@ -398,15 +394,7 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         if not IsCatOwnerOrReadWriteOnly().has_object_permission(request, self, request.user):
             raise PermissionDenied(IsCatOwnerOrReadWriteOnly.message)
 
-        # Валидация ID
-        if image_id is None:
-            raise ValidationError('`image_id` in the URL must be an integer')
-        try:
-            image_id = int(image_id)
-        except ValueError:
-            raise ValidationError('`image_id` in the URL must be integer and greater than zero')
-        if image_id <= 0:
-            raise ValidationError('`image_id` in the URL must be greater than zero')
+        image_id = validate_id(image_id, 'image_id')
 
         # Проверка прав доступа
         try:
@@ -424,3 +412,70 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         image_obj.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FavouriteCatViewSet(BaseResponseDataFormatMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    """ ViewSet для работы с избранными кошками """
+    SCHEMA_TAG = 'Favourite cats'
+
+    queryset = FavouriteCat.objects.select_related('cat', 'user').all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReadFavouriteCatSerializer
+
+    def filter_queryset(self, queryset):
+        return queryset.filter(user=self.request.user)
+
+    @extend_schema(
+        summary="Добавление избранной кошки",
+        description="Добавление избранной кошки.",
+        request=FavouriteCatRequestSerializer,
+        responses={
+            201: OpenApiResponse(response=FavouriteCatResponseSerializer, description="Избранная кошка успешно добавлена"),
+            **get_default_schema_responses(),
+        },
+        tags=[SCHEMA_TAG],
+    )
+    def create(self, request):
+        serializer = FavouriteCatRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            favourite_cat = FavouriteCat.objects.create(cat=serializer.validated_data['cat'], user=request.user)
+        except IntegrityError:
+            raise ValidationError('You have already has this cat as favourite')
+
+        return Response(data=ReadFavouriteCatSerializer(favourite_cat).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="Удаление избранной кошки",
+        description="Удаление избранной кошки.",
+        parameters=[
+            OpenApiParameter('id', description='ID объявления кошки', required=True, type=int, location='path'),
+        ],
+        responses={
+            204: OpenApiResponse(description="Избранная кошка успешно удалена"),
+            **get_default_schema_responses(),
+        },
+        tags=[SCHEMA_TAG],
+    )
+    def destroy(self, request, pk=None):
+        cat_id = validate_id(pk, 'id')
+
+        favourite_cat = FavouriteCat.objects.get(cat_id=cat_id, user=request.user)
+        if not favourite_cat:
+            raise BadRequest('This cat is not your favourite or there is no cat with such ID.')
+        favourite_cat.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        summary="Получение избранных кошек",
+        description="Получение избранных кошек.",
+        responses={
+            200: OpenApiResponse(response=ReadFavouriteCatSerializer(many=True), description="Избранная кошка успешно удалена"),
+            **get_default_schema_responses(),
+        },
+        tags=[SCHEMA_TAG],
+    )
+    def list(self, request):
+        return super().list(request)

@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import serializers, pagination
 
-from cats.models import Breed, Cat, CatImage
+from cats.models import Breed, Cat, CatImage, FavouriteCat
 from core.serializers import BaseResponseSerializer
 from core.utils.get_s3_image_url import get_s3_image_url
 
@@ -17,9 +17,6 @@ class BreedSerializer(serializers.ModelSerializer):
 
 class BreedResponseSerializer(BaseResponseSerializer):
     data = BreedSerializer()
-
-class BreedListResponseSerializer(BaseResponseSerializer):
-    data = BreedSerializer(many=True)
 
 
 class CatImageSerializer(serializers.ModelSerializer):
@@ -95,9 +92,6 @@ class CatResponseSerializer(BaseResponseSerializer):
     data = CatReadSerializer()
 
 
-class CatListResponseSerializer(BaseResponseSerializer):
-    data = CatReadSerializer(many=True)
-
 class CatListWithPaginationResponseSerializer(pagination.PageNumberPagination):
     results = CatReadSerializer(many=True)
 
@@ -135,3 +129,23 @@ class CatWriteSerializer(CatReadSerializer):
             raise serializers.ValidationError("birthday cannot be in the future")
 
         return value
+
+
+class FavouriteCatRequestSerializer(serializers.Serializer):
+    cat_id = serializers.PrimaryKeyRelatedField(
+        source='cat', write_only=True,
+        queryset=Cat.objects.all(),
+        allow_null=False, required=True,
+    )
+
+
+class ReadFavouriteCatSerializer(serializers.ModelSerializer):
+    cat = CatReadSerializer(read_only=True)
+
+    class Meta:
+        model = FavouriteCat
+        fields = ('cat', 'uploaded_at')
+
+
+class FavouriteCatResponseSerializer(BaseResponseSerializer):
+    data = ReadFavouriteCatSerializer()

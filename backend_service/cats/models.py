@@ -157,3 +157,17 @@ class CatImage(models.Model):
             models.Index(fields=['cat']),
             models.Index(fields=['cat', 'is_main']),
         ]
+
+
+class FavouriteCat(models.Model):
+    """ Любимые объявления кошек """
+    id = models.AutoField(primary_key=True)
+    cat = models.ForeignKey('cats.Cat', on_delete=models.CASCADE, related_name='favourites')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='favourites_cats')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.cat.name} - {self.id}'
+
+    class Meta:
+        unique_together = ('cat', 'user')
