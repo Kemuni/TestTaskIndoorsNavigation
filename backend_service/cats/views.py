@@ -20,29 +20,32 @@ from cats.serializers import (
     CatListResponseSerializer,
     CatWriteSerializer,
     CatResponseSerializer,
-    CatImageUploadSerializer, CatImageSerializer, CatImageResponseSerializer,
+    CatImageUploadSerializer,
+    CatImageSerializer,
+    CatImageResponseSerializer,
 )
 from core.mixins import BaseResponseDataFormatMixin
 from core.permissions import IsAdminOrReadOnly
-from core.swagger_utils import get_default_schema_responses
+from core.utils.api_schema_responses import get_default_schema_responses
 
 User = get_user_model()
 
-class ReadBreedViewSet(BaseResponseDataFormatMixin,
-                       mixins.RetrieveModelMixin,
-                       mixins.ListModelMixin,
-                       viewsets.GenericViewSet):
-    """ ViewSet для чтения пород кошек """
+class BreedViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
+    """ ViewSet для пород кошек """
     SCHEMA_TAG = 'Breed'
 
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['name', 'description']
+    search_fields = ['@name', '@description']
     ordering_fields = ['name']
     ordering = ['name']
 
     queryset = Breed.objects.all()
     serializer_class = BreedSerializer
-    permission_classes = [permissions.AllowAny]
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve', 'cats'):
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated(), IsAdminOrReadOnly()]
 
     @extend_schema(
         summary="Получение списка пород кошек",
@@ -109,24 +112,6 @@ class ReadBreedViewSet(BaseResponseDataFormatMixin,
         serializer = CatReadSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
 
-
-class WriteBreedViewSet(BaseResponseDataFormatMixin,
-                        mixins.CreateModelMixin,
-                        mixins.UpdateModelMixin,
-                        mixins.DestroyModelMixin,
-                        viewsets.GenericViewSet):
-    """ ViewSet для изменения пород кошек """
-    SCHEMA_TAG = 'Breed'
-
-    filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['name', 'description']
-    ordering_fields = ['name']
-    ordering = ['name']
-
-    queryset = Breed.objects.all()
-    serializer_class = BreedSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOnly]
-
     @extend_schema(
         summary="Создание породы кошек",
         description="Создание породы кошек",
@@ -188,11 +173,8 @@ class WriteBreedViewSet(BaseResponseDataFormatMixin,
         return super().destroy(request, *args, **kwargs)
 
 
-class ReadCatViewSet(BaseResponseDataFormatMixin,
-                     mixins.RetrieveModelMixin,
-                     mixins.ListModelMixin,
-                     viewsets.GenericViewSet):
-    """ ViewSet для чтения объявления кошек """
+class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
+    """ ViewSet для объявления кошек """
     SCHEMA_TAG = 'Cat'
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -204,10 +186,17 @@ class ReadCatViewSet(BaseResponseDataFormatMixin,
     queryset = Cat.objects.select_related('breed', 'owner', 'mother', 'father').all()
     serializer_class = CatReadSerializer
 
+    def get_serializer_class(self):
+        if self.action in ('create', 'update', 'partial_update'):
+            return CatWriteSerializer
+        return CatReadSerializer
+
     def get_permissions(self):
         if self.action == 'my':
             return [permissions.IsAuthenticated()]
-        return [permissions.AllowAny()]
+        if self.action in ('list', 'retrieve'):
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated(), IsCatOwnerOrReadWriteOnly()]
 
     @extend_schema(
         summary="Получение списка объявления кошек",
@@ -281,20 +270,6 @@ class ReadCatViewSet(BaseResponseDataFormatMixin,
             raise NotImplementedError('You have to add paginator class to the ViewSet.')
         serializer = CatReadSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
-
-
-
-class WriteCatViewSet(BaseResponseDataFormatMixin,
-                      mixins.CreateModelMixin,
-                      mixins.UpdateModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
-    """ ViewSet для изменения объявлений кошек """
-    SCHEMA_TAG = 'Cat'
-
-    queryset = Cat.objects.select_related('breed', 'owner', 'mother', 'father').all()
-    permission_classes = [permissions.IsAuthenticated, IsCatOwnerOrReadWriteOnly]
-    serializer_class = CatWriteSerializer
 
     @extend_schema(
         summary="Создание объявление для кошки",

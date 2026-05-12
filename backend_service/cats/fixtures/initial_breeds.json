@@ -1,0 +1,641 @@
+[
+{
+"model": "cats.breed",
+    "pk": 1,
+    "fields": {
+      "name": "Абиссинская кошка",
+      "description": "Активная, с тиккированным окрасом. Любит высоту и общение.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 2,
+    "fields": {
+      "name": "Американская короткошерстная кошка",
+      "description": "Крепкая, спокойная. Отличный мышелов и компаньон.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 3,
+    "fields": {
+      "name": "Американский бобтейл",
+      "description": "Короткий хвост-помпон. Дружелюбный, похож на собаку.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 4,
+    "fields": {
+      "name": "Американский керл",
+      "description": "Уши загнуты назад. Нежная, жизнерадостная порода.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 5,
+    "fields": {
+      "name": "Аравийский мау",
+      "description": "Дикий окрас, вынослива. Аборигенная порода.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 6,
+    "fields": {
+      "name": "Балинезийская кошка",
+      "description": "Полудлинношерстная сиамка. Голосистая и элегантная.",
+      "hair_type": "MEDIUM"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 7,
+    "fields": {
+      "name": "Бамбино",
+      "description": "Коротконогая бесшерстная. Очень игривая и ласковая.",
+      "hair_type": "HAIRLESS"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 8,
+    "fields": {
+      "name": "Бенгальская кошка",
+      "description": "Шерсть как у леопарда. Активная, умная и энергичная.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 9,
+    "fields": {
+      "name": "Бирманская кошка",
+      "description": "Белые перчатки на лапах. Шелковая шерсть, ласковая.",
+      "hair_type": "MEDIUM"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 10,
+    "fields": {
+      "name": "Бомбейская кошка",
+      "description": "Мини-пантера с черной блестящей шерстью. Общительная.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 11,
+    "fields": {
+      "name": "Британская длинношерстная кошка",
+      "description": "Плюшевая длинная шерсть. Флегматичны и независимы.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 12,
+    "fields": {
+      "name": "Британская короткошерстная кошка",
+      "description": "Плюшевая шерсть, круглые щеки. Спокойные и тактичные.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 13,
+    "fields": {
+      "name": "Бурманская кошка",
+      "description": "Золотистые глаза, шелковистая шерсть. Преданная.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 14,
+    "fields": {
+      "name": "Бурмилла",
+      "description": "Серебристый тиккинг. Дружелюбна к другим животным.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 15,
+    "fields": {
+      "name": "Гавана браун",
+      "description": "Шоколадная шерсть, зеленые глаза. Умная и любопытная.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 16,
+    "fields": {
+      "name": "Гималайская кошка",
+      "description": "Перс с сиамским окрасом. Тихая, спокойная.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 17,
+    "fields": {
+      "name": "Девон-рекс",
+      "description": "Курчавая шерсть, большие уши. Любопытный эльф.",
+      "hair_type": "CURLY"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 18,
+    "fields": {
+      "name": "Донской сфинкс",
+      "description": "Бесшерстный, с острыми ушами. Любит людей.",
+      "hair_type": "HAIRLESS"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 19,
+    "fields": {
+      "name": "Европейская короткошерстная кошка",
+      "description": "Крепкая аборигенная порода. Охотничий инстинкт.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 20,
+    "fields": {
+      "name": "Египетская мау",
+      "description": "Природный пятнистый окрас. Быстрая и грациозная.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 21,
+    "fields": {
+      "name": "Канадский сфинкс",
+      "description": "Голое тело, характер 'носок'. Теплый и ласковый.",
+      "hair_type": "HAIRLESS"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 22,
+    "fields": {
+      "name": "Кимрик",
+      "description": "Бесхвостый мэнкс с полудлинной шерстью. Прыгучий.",
+      "hair_type": "MEDIUM"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 23,
+    "fields": {
+      "name": "Кинкалоу",
+      "description": "Короткие лапы и загнутые уши. Редкая порода.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 24,
+    "fields": {
+      "name": "Корат",
+      "description": "Серебристо-голубая шерсть, сердцевидная морда. Удача.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 25,
+    "fields": {
+      "name": "Корниш-рекс",
+      "description": "Тонкая курчавая шерсть как овечка. Элегантный.",
+      "hair_type": "CURLY"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 26,
+    "fields": {
+      "name": "Курильский бобтейл",
+      "description": "Короткий хвост-помпон. Охотник на рыбу.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 27,
+    "fields": {
+      "name": "Лаперм",
+      "description": "Кудрявая шерсть. Очень нежная и контактная.",
+      "hair_type": "CURLY"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 28,
+    "fields": {
+      "name": "Манчкин",
+      "description": "Такса среди кошек (короткие лапы). Сорока.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 29,
+    "fields": {
+      "name": "Мейн-кун",
+      "description": "Гигант с кисточками на ушах. Добрый великан.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 30,
+    "fields": {
+      "name": "Меконгский бобтейл",
+      "description": "Сиамский окрас, короткий хвост. Любит воду.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 31,
+    "fields": {
+      "name": "Минскин",
+      "description": "Лысый с короткими лапами. Маленький и смелый.",
+      "hair_type": "HAIRLESS"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 32,
+    "fields": {
+      "name": "Мэнкс",
+      "description": "Полностью бесхвостый. Отличный прыгун.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 33,
+    "fields": {
+      "name": "Невская маскарадная кошка",
+      "description": "Сибирская с цветным окрасом. Крупная и пушистая.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 34,
+    "fields": {
+      "name": "Немецкий рекс",
+      "description": "Короткая волнистая шерсть. Дружелюбная.",
+      "hair_type": "CURLY"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 35,
+    "fields": {
+      "name": "Нибелунг",
+      "description": "Голубая полудлинная шерсть. Застенчивый.",
+      "hair_type": "MEDIUM"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 36,
+    "fields": {
+      "name": "Норвежская лесная кошка",
+      "description": "Водоотталкивающая шерсть. Выносливая, как викинг.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 37,
+    "fields": {
+      "name": "Ориентальная кошка",
+      "description": "Ушастая, худая, однотонная. Голосистая и активная.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 38,
+    "fields": {
+      "name": "Оцикет",
+      "description": "Дикий пятнистый окрас. Домашний гепард.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 39,
+    "fields": {
+      "name": "Персидская кошка",
+      "description": "Длинная роскошная шерсть, курносый нос. Спокойная.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 40,
+    "fields": {
+      "name": "Петерболд",
+      "description": "Петербургский сфинкс. Изящный и умный.",
+      "hair_type": "HAIRLESS"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 41,
+    "fields": {
+      "name": "Пиксибоб",
+      "description": "Короткий хвост, многопалость. Похож на рысь.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 42,
+    "fields": {
+      "name": "Рагамаффин",
+      "description": "Сестра рэгдолла. Плюшевая кукла.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 43,
+    "fields": {
+      "name": "Русская голубая кошка",
+      "description": "Серебристо-голубая плюшевая шерсть. Сдержанная.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 44,
+    "fields": {
+      "name": "Рэгдолл",
+      "description": "Расслабляется на руках ('тряпичная кукла'). Ласковая.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 45,
+    "fields": {
+      "name": "Саванна (Ашера)",
+      "description": "Высокая, с диким окрасом. Преданная собако-кошка.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 46,
+    "fields": {
+      "name": "Селкирк-рекс",
+      "description": "Кудрявая как пудель. Очень крупная и спокойная.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 47,
+    "fields": {
+      "name": "Сиамская кошка",
+      "description": "Светлое тело, темные лапы. Королевская и голосистая.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 48,
+    "fields": {
+      "name": "Сибирская кошка",
+      "description": "Плотный подшерсток, водоотталкивающая шерсть. Лесная.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 49,
+    "fields": {
+      "name": "Сингапурская кошка",
+      "description": "Миниатюрная, с тиккированным окрасом. Нежная.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 50,
+    "fields": {
+      "name": "Скукум",
+      "description": "Коротколапая версия лаперма. Кудрявая.",
+      "hair_type": "CURLY"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 51,
+    "fields": {
+      "name": "Сноу-шу",
+      "description": "Белые ботинки и сиамский окрас. Ласковая.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 52,
+    "fields": {
+      "name": "Сококе",
+      "description": "Черепаховый дикий окрас. Аборигенная из Кении.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 53,
+    "fields": {
+      "name": "Сомалийская кошка",
+      "description": "Абиссинка с полудлинной шерстью. Лисичка.",
+      "hair_type": "MEDIUM"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 54,
+    "fields": {
+      "name": "Тайская кошка",
+      "description": "Округлая сиамка старого типа. Преданная.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 55,
+    "fields": {
+      "name": "Тойгер",
+      "description": "Тигровый полосатый окрас. Полосы как у хищника.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 56,
+    "fields": {
+      "name": "Тонкинская кошка",
+      "description": "Гибрид сиамской и бурманской. Аквамариновые глаза.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 57,
+    "fields": {
+      "name": "Турецкая ангора",
+      "description": "Белая, длинная шерсть. Разноцветные глаза.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 58,
+    "fields": {
+      "name": "Турецкий ван",
+      "description": "Любит плавать. Окрас 'ван' (цветная голова и хвост).",
+      "hair_type": "MEDIUM"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 59,
+    "fields": {
+      "name": "Уральский рекс",
+      "description": "Естественная курчавая порода. Крепкое здоровье.",
+      "hair_type": "CURLY"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 60,
+    "fields": {
+      "name": "Хайленд-фолд",
+      "description": "Шотландская вислоухая с длинной шерстью. Совенок.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 61,
+    "fields": {
+      "name": "Чаузи",
+      "description": "Гибрид камышового кота и домашней. Энергичная.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 62,
+    "fields": {
+      "name": "Шантильи-тиффани",
+      "description": "Полудлинная шерсть, цвет корицы. Ласковая.",
+      "hair_type": "MEDIUM"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 63,
+    "fields": {
+      "name": "Шартрез",
+      "description": "Голубая шерсть, медные глаза. Молчаливая и сильная.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 64,
+    "fields": {
+      "name": "Шиншилла",
+      "description": "Разновидность перса с завуалированным окрасом. Плюшевая.",
+      "hair_type": "LONG"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 65,
+    "fields": {
+      "name": "Шотландская вислоухая кошка",
+      "description": "Уши прижаты к голове. Спокойная сова.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 66,
+    "fields": {
+      "name": "Шотландская прямоухая кошка",
+      "description": "Вариант скоттиш-страйт с прямыми ушами.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 67,
+    "fields": {
+      "name": "Экзотическая кошка",
+      "description": "Короткошерстный перс. Плюшевый мишка.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 68,
+    "fields": {
+      "name": "Эльф",
+      "description": "Бесшерстный с загнутыми ушами. Редкий.",
+      "hair_type": "HAIRLESS"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 69,
+    "fields": {
+      "name": "Яванез",
+      "description": "Ориентал с полудлинной шерстью. Голосистый.",
+      "hair_type": "MEDIUM"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 70,
+    "fields": {
+      "name": "Японский бобтейл",
+      "description": "Хвост как хризантема. Любит носить вещи в зубах.",
+      "hair_type": "SHORT"
+    }
+},
+{
+"model": "cats.breed",
+    "pk": 71,
+    "fields": {
+      "name": "Беспородная (дворовая)",
+      "description": "Уникальное сочетание генов.",
+      "hair_type": "UNKNOWN"
+    }
+}
+]

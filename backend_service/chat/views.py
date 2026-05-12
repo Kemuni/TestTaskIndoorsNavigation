@@ -11,7 +11,7 @@ from chat.serializers import DialogSummarySerializer, DialogWithMessagesSerializ
     DialogSummaryResponseSerializer, DialogWithMessagesResponseSerializer, ShortMessageResponseSerializer
 from core.mixins import BaseResponseDataFormatMixin
 from core.pagination import FixResponsePaginatedSchemaMixin
-from core.swagger_utils import get_default_schema_responses
+from core.utils.api_schema_responses import get_default_schema_responses
 
 
 class CursorSetPagination(FixResponsePaginatedSchemaMixin, pagination.CursorPagination):

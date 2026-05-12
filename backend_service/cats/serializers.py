@@ -4,15 +4,15 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework import serializers, pagination
 
-from backend_service.settings import PUBLIC_S3_ENDPOINT_URL, AWS_S3_ENDPOINT_URL
 from cats.models import Breed, Cat, CatImage
 from core.serializers import BaseResponseSerializer
+from core.utils.get_s3_image_url import get_s3_image_url
 
 
 class BreedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Breed
-        fields = ('id', 'name', 'description')
+        fields = ('id', 'name', 'description', 'hair_type')
 
 
 class BreedResponseSerializer(BaseResponseSerializer):
@@ -31,8 +31,7 @@ class CatImageSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_image_url(obj) -> str:
-        # HACK - почему-то при любых настройках она добавляет https:// перед всей ссылкой
-        return obj.image.url.replace(AWS_S3_ENDPOINT_URL, PUBLIC_S3_ENDPOINT_URL).split('://', 1)[1] if obj.image else None
+        return get_s3_image_url(obj, 'image')
 
 class CatImageResponseSerializer(BaseResponseSerializer):
     data = CatImageSerializer(many=True)
@@ -56,9 +55,15 @@ class CatImageUploadSerializer(serializers.Serializer):
 
 
 class CatOwnerSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = get_user_model()
-        fields = ('id', 'email', 'first_name', 'last_name')
+        fields = ('id', 'email', 'first_name', 'last_name', 'image_url')
+
+    @staticmethod
+    def get_image_url(obj) -> str | None:
+        return get_s3_image_url(obj, 'image')
 
 
 class ShortCatSerializer(serializers.ModelSerializer):

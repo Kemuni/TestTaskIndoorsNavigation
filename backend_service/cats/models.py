@@ -10,8 +10,17 @@ from django.utils.translation import gettext_lazy as _
 
 class Breed(models.Model):
     """ Модель породы кошки """
+    class HairType(models.TextChoices):
+        SHORT = 'SHORT', _('Short')
+        MEDIUM = 'MEDIUM', _('Medium')
+        LONG = 'LONG', _('Long')
+        HAIRLESS = 'HAIRLESS', _('Hairless')
+        CURLY = 'CURLY', _('Curly')
+        UNKNOWN = 'UNKNOWN', _('UNKNOWN')
+
     name = models.CharField(_('name'), max_length=255)
     description = models.TextField(_('description'))
+    hair_type = models.CharField(_('hair_type'), max_length=10, choices=HairType)
 
     def __str__(self):
         return self.name
