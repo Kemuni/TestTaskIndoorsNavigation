@@ -1,6 +1,15 @@
+import os
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+
+def get_location_for_upload(_, filename):
+    extension = filename.split('.')[-1]
+    new_filename = f"{uuid.uuid4().hex}.{extension}"
+    return os.path.join('profile_images/', new_filename)
 
 
 class User(AbstractUser):
@@ -31,6 +40,7 @@ class User(AbstractUser):
         null=False,
         unique=True,
     )
+    image = models.ImageField(upload_to=get_location_for_upload, blank=True, null=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
