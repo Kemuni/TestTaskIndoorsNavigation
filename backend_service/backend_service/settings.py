@@ -125,12 +125,39 @@ DATABASES = {
 
 
 # Настраиваем CORS
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:4200",
+    "http://backend:8000",
+    "https://justnoreply.ru",
+    "https://api.justnoreply.ru",
+    'https://213.139.211.225:8000'
+]
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
     "http://backend:8000",
     "https://justnoreply.ru",
     "https://api.justnoreply.ru",
     'https://213.139.211.225:8000'
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'upgrade',
+    'connection',
+    'sec-websocket-key',
+    'sec-websocket-version',
+    'sec-websocket-extensions',
 ]
 
 # Password validation
