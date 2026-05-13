@@ -102,7 +102,7 @@ else:
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [
-                (os.getenv('REDIS_HOST', "127.0.0.1"), os.getenv('REDIS_PORT', 6379), os.getenv('REDIS_PASSWORD', "pass"))
+                f"redis://:{os.getenv('REDIS_PASSWORD', "pass")}@{os.getenv('REDIS_HOST', "127.0.0.1")}:{os.getenv('REDIS_PORT', 6379)}/0"
             ],
         },
     }
