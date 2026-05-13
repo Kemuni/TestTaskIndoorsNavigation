@@ -121,7 +121,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """ Обрабатываем сообщения в группу типа `send_message` """
         await self.send(text_data=json.dumps({
             'success': True,
-            'action': str(self.ActionType.SEND_MESSAGE),
+            'action': self.ActionType.SEND_MESSAGE.value,
             'message': event['message'],
         }))
 
@@ -129,7 +129,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """ Обрабатываем сообщения в группу типа `read_messages` """
         await self.send(text_data=json.dumps({
             'success': True,
-            'action': str(self.ActionType.READ_MESSAGES),
+            'action': self.ActionType.READ_MESSAGES.value,
             'message_ids': event['message_ids'],
         }))
 
@@ -137,7 +137,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """ Обрабатываем сообщения в группу типа `delete_messages` """
         await self.send(text_data=json.dumps({
             'success': True,
-            'action': str(self.ActionType.DELETE_MESSAGES),
+            'action': self.ActionType.DELETE_MESSAGES.value,
             'message_ids': event['message_ids'],
         }))
 
@@ -194,6 +194,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             Message.objects
             .select_related('dialog')
             .filter(
+                sender_id=self.receiver_user_id,
                 id__in=message_ids,
                 dialog__user_1_id=user_1_id,
                 dialog__user_2_id=user_2_id,
