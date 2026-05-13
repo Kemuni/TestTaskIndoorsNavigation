@@ -10,9 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os
-from logging import DEBUG
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-xxyc)&migk8ou3s7g#v&fft0gl7y^-n0u_v!-lc3hkkiw8brq4')
 
-DEBUG = os.getenv('DEBUG', True)
+DEBUG = bool(int(os.getenv('DEBUG', '1')))
 
 ALLOWED_HOSTS = [
     'localhost',

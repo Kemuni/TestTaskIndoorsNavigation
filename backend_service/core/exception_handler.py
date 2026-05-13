@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError, APIException, NotFound
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from core.exceptions import BadRequest
 from core.serializers import BaseResponseSerializer
 
 
@@ -59,6 +60,11 @@ def exception_handler(exc, context):
         error_details["code"] = "NOT_FOUND"
         error_details["message"] = str(exc)
         http_status_code = status.HTTP_404_NOT_FOUND
+
+    elif isinstance(exc, BadRequest):
+        error_details["code"] = "BAD_REQUEST"
+        error_details["message"] = str(exc)
+        http_status_code = status.HTTP_400_BAD_REQUEST
 
     elif isinstance(exc, exceptions_drf.APIException):
         error_details["code"] = error_details["message"] = str(exc.__class__.__name__)

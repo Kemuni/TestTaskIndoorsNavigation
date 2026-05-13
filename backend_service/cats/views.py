@@ -447,6 +447,29 @@ class FavouriteCatViewSet(BaseResponseDataFormatMixin, mixins.ListModelMixin, vi
         return Response(data=ReadFavouriteCatSerializer(favourite_cat).data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
+        summary="Получение избранной кошки по ID кошки",
+        description="Получение избранной кошки по ID кошки",
+        parameters=[
+            OpenApiParameter('id', description='ID объявления кошки', required=True, type=int, location='path'),
+        ],
+        responses={
+            200: OpenApiResponse(response=FavouriteCatResponseSerializer,
+                                 description="Избранная кошка"),
+            **get_default_schema_responses(),
+        },
+        tags=[SCHEMA_TAG],
+    )
+    def retrieve(self, request, pk=None):
+        cat_id = validate_id(pk, 'id')
+
+        try:
+            favourite_cat = FavouriteCat.objects.get(cat_id=cat_id, user=request.user)
+        except FavouriteCat.DoesNotExist:
+            raise NotFound('This cat is not your favourite or there is no cat with such ID.')
+
+        return Response(data=ReadFavouriteCatSerializer(favourite_cat).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
         summary="Удаление избранной кошки",
         description="Удаление избранной кошки.",
         parameters=[
@@ -461,9 +484,10 @@ class FavouriteCatViewSet(BaseResponseDataFormatMixin, mixins.ListModelMixin, vi
     def destroy(self, request, pk=None):
         cat_id = validate_id(pk, 'id')
 
-        favourite_cat = FavouriteCat.objects.get(cat_id=cat_id, user=request.user)
-        if not favourite_cat:
-            raise BadRequest('This cat is not your favourite or there is no cat with such ID.')
+        try:
+            favourite_cat = FavouriteCat.objects.get(cat_id=cat_id, user=request.user)
+        except FavouriteCat.DoesNotExist:
+            raise NotFound('This cat is not your favourite or there is no cat with such ID.')
         favourite_cat.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
