@@ -4,13 +4,20 @@ from rest_framework import serializers
 
 from chat.models import Dialog, Message
 from core.serializers import BaseResponseSerializer
+from core.utils.get_s3_image_url import get_s3_image_url
 
 User = get_user_model()
 
 class DialogUserSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField(read_only=True)
+
+    @staticmethod
+    def get_image_url(obj) -> str | None:
+        return get_s3_image_url(obj, 'image')
+
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name')
+        fields = ('id', 'email', 'first_name', 'last_name', 'image_url')
 
 
 class ShortMessageSerializer(serializers.ModelSerializer):
