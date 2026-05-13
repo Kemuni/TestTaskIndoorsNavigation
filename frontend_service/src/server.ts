@@ -15,7 +15,9 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 const apiOrigin = process.env['API_ORIGIN'] || 'http://127.0.0.1:8000';
 
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+const angularApp = new AngularNodeAppEngine({
+  allowedHosts: ['localhost', '127.0.0.1', '0.0.0.0'],
+});
 
 /**
  * Proxy /api/* requests to the Django backend.

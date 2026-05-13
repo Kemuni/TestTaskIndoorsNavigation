@@ -92,6 +92,36 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
 
+  frontend:
+    build:
+      context: ./frontend_service
+      dockerfile: Dockerfile
+      target: development
+    container_name: frontend
+    image: frontend
+    ports:
+      - "4200:4200"
+    restart: always
+    networks:
+      - internal-network
+    depends_on:
+      - backend
+    develop:
+      watch:
+        - path: ./frontend_service
+          action: sync
+          target: ./app
+          ignore:
+            - .vscode
+            - node_modules
+            - dist
+        - path: ./frontend_service/package.json
+          action: rebuild
+    env_file:
+      - .env
+    environment:
+      - API_ORIGIN=http://backend:8000
+
 
 networks:
   internal-network:
