@@ -33,12 +33,18 @@ import { SkeletonModule } from 'primeng/skeleton';
           <i class="pi pi-arrow-left text-lg" aria-hidden="true"></i>
         </a>
         @if (otherUser()) {
-          <div
-            class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-bold text-sm shrink-0"
-            aria-hidden="true"
-          >
-            {{ otherUser()!.first_name[0] }}{{ otherUser()!.last_name[0] }}
-          </div>
+          @if (otherUser()!.image_url) {
+            <img
+              [src]="otherUser()!.image_url"
+              [alt]="otherUser()!.first_name + ' ' + otherUser()!.last_name"
+              class="w-10 h-10 rounded-full object-cover"
+              aria-hidden="true"
+            />
+          } @else {
+            <span class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-semibold text-xs" aria-hidden="true">
+              {{ otherUser()!.first_name[0] }}{{ otherUser()!.last_name[0] }}
+            </span>
+          }
           <h1 class="font-semibold text-slate-900">
             {{ otherUser()!.first_name }} {{ otherUser()!.last_name }}
           </h1>

@@ -65,12 +65,18 @@ import { BadgeModule } from 'primeng/badge';
                 [attr.aria-label]="'Диалог с ' + dialog.with_user.first_name + ' ' + dialog.with_user.last_name"
               >
                 <!-- Avatar -->
-                <div
-                  class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-bold text-sm shrink-0"
-                  aria-hidden="true"
-                >
-                  {{ dialog.with_user.first_name[0] }}{{ dialog.with_user.last_name[0] }}
-                </div>
+                @if (dialog.with_user.image_url) {
+                  <img
+                    [src]="dialog.with_user.image_url"
+                    [alt]="dialog.with_user.first_name + ' ' + dialog.with_user.last_name"
+                    class="w-12 h-12 rounded-full object-cover"
+                    aria-hidden="true"
+                  />
+                } @else {
+                  <span class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-semibold text-xs" aria-hidden="true">
+                    {{ dialog.with_user.first_name[0] }}{{ dialog.with_user.last_name[0] }}
+                  </span>
+                }
 
                 <!-- Content -->
                 <div class="flex-1 min-w-0">

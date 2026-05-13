@@ -299,6 +299,7 @@ export class DirectChatComponent implements OnInit, AfterViewInit, OnDestroy, Af
           this.messages.update((msgs) => [...msgs, confirmed]);
         }
         this.shouldScrollBottom = true;
+        // this.markUnreadMessages();
       } else if (wsMsg.type === 'delete_messages' && wsMsg.message_ids?.length) {
         this.messages.update((msgs) =>
           msgs.filter((m) => !wsMsg.message_ids!.includes(m.id)),

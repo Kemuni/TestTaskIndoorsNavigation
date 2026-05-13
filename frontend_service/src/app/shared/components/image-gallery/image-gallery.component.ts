@@ -57,7 +57,6 @@ import { CatImage } from '../../../core/models/cat.model';
           }
         } @else {
           <div class="flex flex-col items-center text-slate-400" aria-hidden="true">
-            <span class="text-6xl">🐱</span>
             <span class="text-sm mt-2">Нет фото</span>
           </div>
         }

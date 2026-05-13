@@ -98,11 +98,11 @@ export class CatFormComponent implements OnInit {
   });
 
   readonly motherOptions = computed<CatParentOption[]>(() =>
-    this.myCats().filter((c) => c.gender === 'F').map(this.toCatParentOption),
+    this.myCats().filter((c) => c.gender === 'F' && c.id !== this.editId()).map(this.toCatParentOption),
   );
 
   readonly fatherOptions = computed<CatParentOption[]>(() =>
-    this.myCats().filter((c) => c.gender === 'M').map(this.toCatParentOption),
+    this.myCats().filter((c) => c.gender === 'M' && c.id !== this.editId()).map(this.toCatParentOption),
   );
 
   readonly genderOptions: SelectOption<GenderEnum>[] = [
