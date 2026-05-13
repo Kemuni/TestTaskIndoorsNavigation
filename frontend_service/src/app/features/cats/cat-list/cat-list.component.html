@@ -1,0 +1,228 @@
+<main class="max-w-7xl mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6 gap-4 flex-wrap">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Объявления о котах</h1>
+      @if (!loading() && totalCount() > 0) {
+        <p class="text-slate-500 text-sm mt-0.5">Найдено: {{ totalCount() }}</p>
+      }
+    </div>
+
+    <div class="flex gap-2">
+      <p-button
+        icon="pi pi-filter"
+        label="Фильтры"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="filtersVisible.set(true)"
+        aria-label="Открыть фильтры"
+      />
+    </div>
+  </div>
+
+  <!-- Filters drawer -->
+  <p-drawer
+    [(visible)]="filtersVisible"
+    header="Фильтры"
+    position="right"
+    styleClass="w-full sm:w-96"
+  >
+    <form [formGroup]="filterForm" class="flex flex-col gap-4 p-1">
+      <div class="flex flex-col gap-1">
+        <label for="search-input" class="text-sm font-medium text-slate-700">Поиск</label>
+        <input
+          id="search-input"
+          pInputText
+          type="search"
+          formControlName="search"
+          placeholder="Имя, порода..."
+          class="w-full"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="breed-select" class="text-sm font-medium text-slate-700">Порода</label>
+        <p-select
+          inputId="breed-select"
+          formControlName="breed_id"
+          [options]="breedOptions()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Все породы"
+          styleClass="w-full"
+          appendTo="body"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="gender-select" class="text-sm font-medium text-slate-700">Пол</label>
+        <p-select
+          inputId="gender-select"
+          formControlName="gender"
+          [options]="genderOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Любой пол"
+          styleClass="w-full"
+          appendTo="body"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="status-select" class="text-sm font-medium text-slate-700">Статус</label>
+        <p-select
+          inputId="status-select"
+          formControlName="status"
+          [options]="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Любой статус"
+          styleClass="w-full"
+          appendTo="body"
+        />
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+          <label for="min-age" class="text-sm font-medium text-slate-700">Мин. возраст (мес.)</label>
+          <p-inputnumber
+            inputId="min-age"
+            formControlName="min_age_months"
+            [min]="0"
+            [showButtons]="false"
+            placeholder="0"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="max-age" class="text-sm font-medium text-slate-700">Макс. возраст (мес.)</label>
+          <p-inputnumber
+            inputId="max-age"
+            formControlName="max_age_months"
+            [min]="0"
+            [showButtons]="false"
+            placeholder="∞"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+          <label for="price-min" class="text-sm font-medium text-slate-700">Цена от (₽)</label>
+          <p-inputnumber
+            inputId="price-min"
+            formControlName="price_min"
+            [min]="0"
+            [showButtons]="false"
+            placeholder="0"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="price-max" class="text-sm font-medium text-slate-700">Цена до (₽)</label>
+          <p-inputnumber
+            inputId="price-max"
+            formControlName="price_max"
+            [min]="0"
+            [showButtons]="false"
+            placeholder="∞"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          />
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <p-checkbox
+          formControlName="is_free"
+          [binary]="true"
+          inputId="is-free"
+          aria-label="Только бесплатные"
+        />
+        <label for="is-free" class="text-sm text-slate-700 cursor-pointer">Только бесплатные</label>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <p-button
+          label="Применить"
+          icon="pi pi-check"
+          styleClass="flex-1"
+          (onClick)="onApplyFilters()"
+        />
+        <p-button
+          label="Сбросить"
+          icon="pi pi-times"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="onResetFilters()"
+        />
+      </div>
+    </form>
+  </p-drawer>
+
+  <!-- Cat grid -->
+  @if (loading()) {
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+      aria-live="polite"
+      aria-label="Загрузка объявлений"
+    >
+      @for (i of [1,2,3,4,5,6,7,8]; track i) {
+        <div class="rounded-2xl overflow-hidden border border-slate-100 bg-white">
+          <p-skeleton height="200px" />
+          <div class="p-4 flex flex-col gap-2">
+            <p-skeleton width="70%" height="20px" />
+            <p-skeleton width="40%" height="16px" />
+            <p-skeleton width="55%" height="16px" />
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (error()) {
+    <div class="text-center py-24 text-slate-400" role="alert">
+      <div class="text-6xl mb-4" aria-hidden="true">⚠️</div>
+      <p class="text-lg font-medium text-slate-600">Не удалось загрузить объявления</p>
+      <p class="text-sm mt-1">Сервер недоступен — попробуйте позже</p>
+      <button
+        type="button"
+        class="mt-4 px-4 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+        (click)="loadCats()"
+      >
+        Повторить
+      </button>
+    </div>
+  } @else if (cats().length === 0) {
+    <div class="text-center py-24 text-slate-400" role="status">
+      <div class="text-6xl mb-4" aria-hidden="true">🐱</div>
+      <p class="text-lg font-medium">Объявлений не найдено</p>
+      <p class="text-sm mt-1">Попробуйте изменить фильтры</p>
+    </div>
+  } @else {
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+      aria-live="polite"
+    >
+      @for (cat of cats(); track cat.id) {
+        <app-cat-card [cat]="cat" />
+      }
+    </div>
+  }
+
+  <!-- Paginator -->
+  @if (totalCount() > pageSize) {
+    <div class="mt-8 flex justify-center">
+      <p-paginator
+        [rows]="pageSize"
+        [totalRecords]="totalCount()"
+        [first]="(currentPage() - 1) * pageSize"
+        (onPageChange)="onPageChange($event)"
+        [rowsPerPageOptions]="[]"
+        aria-label="Навигация по страницам"
+      />
+    </div>
+  }
+</main>
