@@ -65,7 +65,6 @@ import { AvatarModule } from 'primeng/avatar';
         </div>
       } @else if (cats().length === 0) {
         <div class="text-center py-12 text-slate-400">
-          <div class="text-5xl mb-3" aria-hidden="true">🐱</div>
           <p>У этого пользователя нет объявлений</p>
         </div>
       } @else {

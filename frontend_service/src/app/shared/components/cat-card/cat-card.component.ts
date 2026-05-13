@@ -26,7 +26,6 @@ import { CatRead, GENDER_LABELS, STATUS_LABELS, STATUS_SEVERITY } from '../../..
             class="w-full h-full flex flex-col items-center justify-center text-slate-400"
             aria-hidden="true"
           >
-            <span class="text-5xl">🐱</span>
             <span class="text-sm mt-2">Нет фото</span>
           </div>
         }

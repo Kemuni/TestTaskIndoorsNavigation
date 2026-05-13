@@ -166,7 +166,6 @@ import { MessageService } from 'primeng/api';
           </div>
         } @else if (myCats().length === 0) {
           <div class="text-center py-12 text-slate-400">
-            <div class="text-5xl mb-3" aria-hidden="true">🐱</div>
             <p class="font-medium">У вас пока нет объявлений</p>
             <a routerLink="/cats/new" class="mt-2 inline-block text-sm text-gray-900 hover:underline">
               Создать первое объявление
