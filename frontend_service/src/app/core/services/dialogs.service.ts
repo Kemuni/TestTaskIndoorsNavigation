@@ -21,4 +21,13 @@ export class DialogsService {
   getMessages(id: number): Observable<PaginatedResponse<ShortMessage>> {
     return this.http.get<PaginatedResponse<ShortMessage>>(`/api/dialog/${id}/messages/`);
   }
+
+  getMessagesFromUrl(url: string): Observable<PaginatedResponse<ShortMessage>> {
+    try {
+      const parsed = new URL(url);
+      return this.http.get<PaginatedResponse<ShortMessage>>(parsed.pathname + parsed.search);
+    } catch {
+      return this.http.get<PaginatedResponse<ShortMessage>>(url);
+    }
+  }
 }

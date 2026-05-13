@@ -1,5 +1,6 @@
 import {
   AfterViewChecked,
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -57,6 +58,13 @@ import { SkeletonModule } from 'primeng/skeleton';
         aria-live="polite"
         aria-label="Сообщения"
       >
+        <!-- Load more indicator at top -->
+        @if (loadingMore()) {
+          <div class="flex justify-center py-2" aria-label="Загрузка старых сообщений">
+            <i class="pi pi-spin pi-spinner text-slate-400" aria-hidden="true"></i>
+          </div>
+        }
+
         @if (loading()) {
           @for (i of [1,2,3,4]; track i) {
             <div class="flex gap-2" [class]="i % 2 === 0 ? 'flex-row-reverse' : ''">
@@ -128,7 +136,7 @@ import { SkeletonModule } from 'primeng/skeleton';
     </main>
   `,
 })
-export class DirectChatComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class DirectChatComponent implements OnInit, AfterViewInit, OnDestroy, AfterViewChecked {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef<HTMLDivElement>;
 
   private readonly dialogsService = inject(DialogsService);
@@ -142,8 +150,13 @@ export class DirectChatComponent implements OnInit, OnDestroy, AfterViewChecked 
   readonly messages = signal<ShortMessage[]>([]);
   readonly receiver = signal<User | null>(null);
   readonly loading = signal(true);
+  readonly loadingMore = signal(false);
+  readonly hasMore = signal(false);
 
+  private dialogId: number | null = null;
+  private nextPageUrl: string | null = null;
   private wsSub?: Subscription;
+  private scrollListener?: EventListener;
   private shouldScrollBottom = false;
 
   readonly messageForm = this.fb.nonNullable.group({
@@ -161,7 +174,7 @@ export class DirectChatComponent implements OnInit, OnDestroy, AfterViewChecked 
   ngOnInit(): void {
     this.usersService.getProfile(this.receiverUserId).subscribe({
       next: (res) => this.receiver.set(res.data),
-      error: () => { /* non-critical */ },
+      error: () => {},
     });
 
     this.dialogsService.getDialogs().subscribe({
@@ -170,18 +183,8 @@ export class DirectChatComponent implements OnInit, OnDestroy, AfterViewChecked 
           (d) => d.with_user.id === this.receiverUserId,
         );
         if (existing) {
-          this.dialogsService.getDialog(existing.id).subscribe({
-            next: (dialogRes) => {
-              this.messages.set([...dialogRes.data.recent_messages].reverse());
-              this.shouldScrollBottom = true;
-            },
-            error: () => { /* proceed without history */ },
-            complete: () => {
-              this.loading.set(false);
-              this.connectWebSocket();
-              this.markUnreadMessages();
-            },
-          });
+          this.dialogId = existing.id;
+          this.loadInitialMessages(existing.id);
         } else {
           this.loading.set(false);
           this.connectWebSocket();
@@ -191,6 +194,64 @@ export class DirectChatComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.loading.set(false);
         this.connectWebSocket();
       },
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.attachScrollListener();
+  }
+
+  private attachScrollListener(): void {
+    const el = this.messagesContainer?.nativeElement;
+    if (!el) return;
+    this.scrollListener = () => {
+      if (el.scrollTop < 80 && this.hasMore() && !this.loadingMore()) {
+        this.loadMoreMessages();
+      }
+    };
+    el.addEventListener('scroll', this.scrollListener);
+  }
+
+  private loadInitialMessages(dialogId: number): void {
+    this.dialogsService.getMessages(dialogId).subscribe({
+      next: (res) => {
+        // API returns newest-first — reverse so oldest is at top
+        this.messages.set([...res.data.results].reverse());
+        this.nextPageUrl = res.data.next ?? null;
+        this.hasMore.set(!!res.data.next);
+        this.shouldScrollBottom = true;
+      },
+      error: () => {},
+      complete: () => {
+        this.loading.set(false);
+        this.connectWebSocket();
+        this.markUnreadMessages();
+      },
+    });
+  }
+
+  private loadMoreMessages(): void {
+    if (!this.nextPageUrl || this.loadingMore()) return;
+    this.loadingMore.set(true);
+
+    const el = this.messagesContainer?.nativeElement;
+    const prevScrollHeight = el?.scrollHeight ?? 0;
+
+    this.dialogsService.getMessagesFromUrl(this.nextPageUrl).subscribe({
+      next: (res) => {
+        const older = [...res.data.results].reverse();
+        this.messages.update((msgs) => [...older, ...msgs]);
+        this.nextPageUrl = res.data.next ?? null;
+        this.hasMore.set(!!res.data.next);
+        // Restore scroll so the user stays at the same spot
+        if (el) {
+          requestAnimationFrame(() => {
+            el.scrollTop = el.scrollHeight - prevScrollHeight;
+          });
+        }
+      },
+      error: () => {},
+      complete: () => this.loadingMore.set(false),
     });
   }
 
@@ -208,7 +269,6 @@ export class DirectChatComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.chatService.connectToUser(this.receiverUserId);
     this.wsSub = this.chatService.messages$.subscribe((wsMsg) => {
       if (wsMsg.type === 'message' && wsMsg.id != null && wsMsg.content) {
-        // Find a pending message from the current user with matching content and replace it
         const uid = this.currentUserId;
         const pendingIdx = this.messages().findIndex(
           (m) => m._pending && m.content === wsMsg.content && m.sender_id === uid,
@@ -253,6 +313,10 @@ export class DirectChatComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   ngOnDestroy(): void {
+    const el = this.messagesContainer?.nativeElement;
+    if (el && this.scrollListener) {
+      el.removeEventListener('scroll', this.scrollListener);
+    }
     this.wsSub?.unsubscribe();
     this.chatService.disconnect();
   }

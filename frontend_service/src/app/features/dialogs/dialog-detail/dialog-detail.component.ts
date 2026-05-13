@@ -85,7 +85,7 @@ import { SkeletonModule } from 'primeng/skeleton';
                 >
                   {{ formatTime(msg.created_at) }}
                   @if (isOwn(msg) && msg.read_at) {
-                    <span class="ml-1" aria-label="Прочитано">✓✓</span>
+                    <span class="ml-1 -tracking-[0.5em]" aria-label="Прочитано">✓✓</span>
                   }
                 </time>
               </div>
@@ -153,14 +153,16 @@ export class DialogDetailComponent implements OnInit, OnDestroy, AfterViewChecke
     this.dialogsService.getDialog(this.dialogId).subscribe({
       next: (res) => {
         this.otherUser.set(res.data.with_user);
-        this.messages.set(res.data.recent_messages);
+        // API returns newest-first — reverse so oldest is at top
+        this.messages.set([...res.data.recent_messages].reverse());
         this.loading.set(false);
         this.shouldScrollBottom = true;
+        this.chatService.connectToUser(res.data.with_user.id);
+        this.markUnreadMessages();
       },
       error: () => this.loading.set(false),
     });
 
-    this.chatService.connect(this.dialogId);
     this.wsSub = this.chatService.messages$.subscribe((wsMsg) => {
       if (wsMsg.type === 'message' && wsMsg.id && wsMsg.content && wsMsg.sender_id) {
         const newMsg: ShortMessage = {
@@ -172,8 +174,29 @@ export class DialogDetailComponent implements OnInit, OnDestroy, AfterViewChecke
         };
         this.messages.update((prev) => [...prev, newMsg]);
         this.shouldScrollBottom = true;
+        // Immediately mark incoming messages as read
+        if (wsMsg.sender_id !== this.currentUserId) {
+          this.chatService.readMessages([wsMsg.id]);
+        }
+      } else if (wsMsg.type === 'read_messages' && wsMsg.message_ids?.length) {
+        const now = new Date().toISOString();
+        this.messages.update((msgs) =>
+          msgs.map((m) =>
+            wsMsg.message_ids!.includes(m.id) ? { ...m, read_at: now } : m,
+          ),
+        );
       }
     });
+  }
+
+  private markUnreadMessages(): void {
+    const uid = this.currentUserId;
+    const unreadIds = this.messages()
+      .filter((m) => m.sender_id !== uid && m.read_at === null)
+      .map((m) => m.id);
+    if (unreadIds.length > 0) {
+      this.chatService.readMessages(unreadIds);
+    }
   }
 
   ngAfterViewChecked(): void {
@@ -195,7 +218,7 @@ export class DialogDetailComponent implements OnInit, OnDestroy, AfterViewChecke
   sendMessage(): void {
     if (this.messageForm.invalid) return;
     const { content } = this.messageForm.getRawValue();
-    this.chatService.sendToDialog(content);
+    this.chatService.send(content);
     this.messageForm.reset();
   }
 
