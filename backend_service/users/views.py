@@ -13,7 +13,6 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from core.mixins import BaseResponseDataFormatMixin
 from core.serializers import ErrorResponseSerializer
 from core.utils.api_schema_responses import get_default_schema_responses
-from users.permissions import IsProfileOwner
 from users.serializers import (
     RegisterSerializer,
     AuthUserResponseSerializer,

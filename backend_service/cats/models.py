@@ -77,13 +77,13 @@ class Cat(models.Model):
     description = models.TextField(_('description'), blank=True, null=True)
 
     mother = models.ForeignKey(
-        'cats.Cat', on_delete=models.PROTECT,
+        'cats.Cat', on_delete=models.SET_NULL,
         related_name='children_as_father',
         blank=True, null=True,
         verbose_name=_('mother'),
     )
     father = models.ForeignKey(
-        'cats.Cat', on_delete=models.PROTECT,
+        'cats.Cat', on_delete=models.SET_NULL,
         related_name='children_as_mother',
         blank=True, null=True,
         verbose_name=_('father'),

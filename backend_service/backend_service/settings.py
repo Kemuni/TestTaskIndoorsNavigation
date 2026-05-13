@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os
+from logging import DEBUG
 from pathlib import Path
 from datetime import timedelta
 
@@ -29,6 +30,9 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '0.0.0.0',
     'backend',
+    "justnoreply.ru",
+    "api.justnoreply.ru",
+    '213.139.211.225',
 ]
 
 
@@ -36,6 +40,7 @@ ALLOWED_HOSTS = [
 
 INSTALLED_APPS = [
     'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,7 +53,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'users',
     'cats',
-    'channels',
     'chat',
     'drf_spectacular',
     'django_filters',
@@ -88,10 +92,21 @@ ASGI_APPLICATION = 'backend_service.asgi.application'
 # Channel layers from django-channels
 # https://channels.readthedocs.io/en/stable/topics/channel_layers.html
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+    "default": dict()
 }
+if DEBUG:
+    CHANNEL_LAYERS["default"] = {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+else:
+    CHANNEL_LAYERS["default"] = {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                (os.getenv('REDIS_HOST', "127.0.0.1"), os.getenv('REDIS_PORT', 6379), os.getenv('REDIS_PASSWORD', "pass"))
+            ],
+        },
+    }
 
 
 # Database
@@ -113,6 +128,9 @@ DATABASES = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
     "http://backend:8000",
+    "https://justnoreply.ru",
+    "https://api.justnoreply.ru",
+    'https://213.139.211.225:8000'
 ]
 
 # Password validation

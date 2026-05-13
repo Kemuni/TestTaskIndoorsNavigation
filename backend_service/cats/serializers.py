@@ -65,10 +65,18 @@ class CatOwnerSerializer(serializers.ModelSerializer):
 
 class ShortCatSerializer(serializers.ModelSerializer):
     breed = BreedSerializer(read_only=True)
+    main_image = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Cat
-        fields = ('id', 'name', 'breed', 'gender', 'color', 'age', 'age_months')
+        fields = ('id', 'name', 'breed', 'gender', 'color', 'age', 'age_months', 'main_image')
+
+    @staticmethod
+    def get_main_image(obj) -> str | None:
+        image = obj.images.filter(is_main=True).first() or obj.images.first()
+        if image is None:
+            return None
+        return get_s3_image_url(image, 'image')
 
 
 class CatReadSerializer(serializers.ModelSerializer):

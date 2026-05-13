@@ -285,7 +285,7 @@ class CatViewSet(BaseResponseDataFormatMixin, viewsets.ModelViewSet):
         description="Обновление объявления кошки с введенным ID",
         request=CatWriteSerializer,
         parameters=[
-            OpenApiParameter('id', description='ID породы кошки', required=True, type=int, location='path')
+            OpenApiParameter('id', description='ID кошки', required=True, type=int, location='path')
         ],
         responses={
             200: OpenApiResponse(response=CatWriteSerializer, description="Данные о кошке"),

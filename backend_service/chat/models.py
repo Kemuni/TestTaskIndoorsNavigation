@@ -1,14 +1,11 @@
-from django.contrib.auth import get_user_model
 from django.db import models
-
-User = get_user_model()
 
 
 class Dialog(models.Model):
     """ Личный диалог между двумя пользователями """
     # user_1.id > user_2.id ВСЕГДА
-    user_1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dialogs_as_first')
-    user_2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dialogs_as_second')
+    user_1 = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='dialogs_as_first')
+    user_2 = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='dialogs_as_second')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -30,7 +27,7 @@ class Dialog(models.Model):
 class Message(models.Model):
     """ Сообщение в диалоге """
     dialog = models.ForeignKey(Dialog, on_delete=models.CASCADE, related_name='messages')
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    sender = models.ForeignKey('users.User', on_delete=models.CASCADE)
     content = models.TextField(max_length=800)
     created_at = models.DateTimeField(auto_now_add=True)
     read_at = models.DateTimeField(default=None, blank=True, null=True)

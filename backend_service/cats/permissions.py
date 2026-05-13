@@ -12,10 +12,7 @@ class IsCatOwnerOrReadWriteOnly(permissions.BasePermission):
     message = 'Only cat owners can edit/delete this cat model, other authorized users can only read or create.'
 
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS + ('POST',):
-            return request.user and request.user.is_authenticated
-
-        return request.user and request.user.is_superuser
+        return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS + ('POST',):
