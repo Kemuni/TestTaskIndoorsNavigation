@@ -16,6 +16,10 @@ export class FavouritesService {
     return this.http.post<ApiResponse<FavouriteCat>>('/api/favourite-cat/', { cat_id: catId });
   }
 
+  getFavourite(catId: number): Observable<ApiResponse<FavouriteCat>> {
+    return this.http.get<ApiResponse<FavouriteCat>>(`/api/favourite-cat/${catId}/`);
+  }
+
   removeFavourite(favId: number): Observable<void> {
     return this.http.delete<void>(`/api/favourite-cat/${favId}/`);
   }

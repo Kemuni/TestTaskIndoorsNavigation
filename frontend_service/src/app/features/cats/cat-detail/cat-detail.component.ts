@@ -127,13 +127,12 @@ export class CatDetailComponent implements OnInit {
   }
 
   private loadFavouriteStatus(): void {
-    this.favouritesService.getFavourites().subscribe({
+    this.favouritesService.getFavourite(this.catId).subscribe({
       next: (res) => {
-        const match = res.data.results.find((f) => f.cat.id === this.catId);
-        this.favouriteId.set(match?.id ?? null);
+        this.favouriteId.set(res.data.id);
       },
       error: () => {},
-    });
+    })
   }
 
   toggleFavourite(): void {
@@ -141,7 +140,7 @@ export class CatDetailComponent implements OnInit {
     this.favLoading.set(true);
     const existing = this.favouriteId();
     if (existing !== null) {
-      this.favouritesService.removeFavourite(existing).subscribe({
+      this.favouritesService.removeFavourite(this.catId).subscribe({
         next: () => {
           this.favouriteId.set(null);
           this.favLoading.set(false);
