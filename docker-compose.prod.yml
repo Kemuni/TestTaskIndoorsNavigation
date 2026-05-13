@@ -115,7 +115,7 @@ services:
     env_file:
       - .env
     environment:
-      - DEBUG=${DEBUG?Variable not set}
+      - DEBUG=0
       - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER?Variable not set}
       - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD?Variable not set}
       - AWS_STORAGE_BUCKET_NAME=${MINIO_DEFAULT_BUCKET_NAME?Variable not set}
