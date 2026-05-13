@@ -86,12 +86,18 @@ import { SkeletonModule } from 'primeng/skeleton';
               >
                 <p class="m-0">{{ msg.content }}</p>
                 <time
-                  class="block text-xs mt-1 opacity-70"
+                  class="block text-xs mt-1 opacity-70 flex items-center gap-1"
                   [attr.datetime]="msg.created_at"
                 >
                   {{ formatTime(msg.created_at) }}
-                  @if (isOwn(msg) && msg.read_at) {
-                    <span class="ml-1 -tracking-[0.5em]" aria-label="Прочитано">✓✓</span>
+                  @if (isOwn(msg)) {
+                    @if (msg._pending) {
+                      <i class="pi pi-spin pi-spinner text-xs opacity-70 ml-1" aria-label="Отправляется"></i>
+                    } @else if (msg.read_at) {
+                      <span class="ml-1 -tracking-[0.5em]" aria-label="Прочитано">✓✓</span>
+                    } @else {
+                      <span class="ml-1" aria-label="Доставлено">✓</span>
+                    }
                   }
                 </time>
               </div>
