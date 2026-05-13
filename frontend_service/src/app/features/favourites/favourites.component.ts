@@ -40,7 +40,6 @@ import { SkeletonModule } from 'primeng/skeleton';
         </div>
       } @else if (favourites().length === 0) {
         <div class="text-center py-16 text-slate-400">
-          <div class="text-5xl mb-4" aria-hidden="true">🐱</div>
           <p class="text-lg font-medium text-slate-600">В избранном пусто</p>
           <p class="text-sm mt-1">Добавляйте понравившихся кошек с их страницы</p>
           <a

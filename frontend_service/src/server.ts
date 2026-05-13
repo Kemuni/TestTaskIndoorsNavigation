@@ -16,7 +16,8 @@ const apiOrigin = process.env['API_ORIGIN'] || 'http://127.0.0.1:8000';
 
 const app = express();
 const angularApp = new AngularNodeAppEngine({
-  allowedHosts: ['localhost', '127.0.0.1', '0.0.0.0'],
+  allowedHosts: ['localhost', '127.0.0.1', '0.0.0.0', "justnoreply.ru", "cdn.justnoreply.ru", '213.139.211.225'],
+  trustProxyHeaders: true,
 });
 
 /**

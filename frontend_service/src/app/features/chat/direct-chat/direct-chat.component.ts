@@ -36,12 +36,21 @@ import { SkeletonModule } from 'primeng/skeleton';
           <i class="pi pi-arrow-left text-lg" aria-hidden="true"></i>
         </a>
         @if (receiver()) {
-          <div
-            class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-bold text-sm shrink-0"
-            aria-hidden="true"
-          >
-            {{ receiver()!.first_name[0] }}{{ receiver()!.last_name[0] }}
-          </div>
+          @if (receiver()!.image_url) {
+            <img
+              [src]="receiver()!.image_url"
+              [alt]="receiver()!.first_name + ' ' + receiver()!.last_name"
+              class="w-10 h-10 rounded-full object-cover shrink-0"
+              aria-hidden="true"
+            />
+          } @else {
+            <div
+              class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-bold text-sm shrink-0"
+              aria-hidden="true"
+            >
+              {{ receiver()!.first_name[0] }}{{ receiver()!.last_name[0] }}
+            </div>
+          }
           <h1 class="font-semibold text-slate-900">
             {{ receiver()!.first_name }} {{ receiver()!.last_name }}
           </h1>
@@ -98,7 +107,7 @@ import { SkeletonModule } from 'primeng/skeleton';
                     @if (msg._pending) {
                       <i class="pi pi-spin pi-spinner text-xs opacity-70 ml-1" aria-label="Отправляется"></i>
                     } @else if (msg.read_at) {
-                      <span class="ml-1" aria-label="Прочитано">✓✓</span>
+                      <span class="ml-1 -tracking-[0.5em]" aria-label="Прочитано">✓✓</span>
                     } @else {
                       <span class="ml-1" aria-label="Доставлено">✓</span>
                     }

@@ -86,4 +86,11 @@ export class AuthService {
     }
     this._currentUser.set(res.data.user);
   }
+
+  updateCurrentUser(user: User): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('current_user', JSON.stringify(user));
+    }
+    this._currentUser.set(user);
+  }
 }

@@ -145,7 +145,7 @@
         </div>
         <div class="flex flex-col gap-1">
           <label for="cat-bw" class="text-sm font-medium text-slate-700">
-            Вес при рождении (кг) <span class="text-red-500" aria-hidden="true">*</span>
+            Вес при рождении (кг)
           </label>
           <p-inputnumber
             inputId="cat-bw"
@@ -157,7 +157,6 @@
             placeholder="0.10"
             styleClass="w-full"
             inputStyleClass="w-full"
-            aria-required="true"
           />
           @if (fieldInvalid('birth_weight')) {
             <span class="text-xs text-red-600" role="alert">Укажите вес от 0.01 до 10 кг</span>
@@ -332,13 +331,6 @@
         <h2 class="text-lg font-semibold">Объявление создано!</h2>
       </div>
       <p class="text-slate-600 text-sm">Теперь вы можете добавить фотографии к вашему объявлению.</p>
-
-      <app-image-gallery
-        [images]="savedCat()!.images"
-        [editMode]="true"
-        (uploadImages)="onUploadImages($event)"
-        (deleteImage)="onDeleteImage($event)"
-      />
 
       <p-button
         label="Готово — перейти к объявлению"

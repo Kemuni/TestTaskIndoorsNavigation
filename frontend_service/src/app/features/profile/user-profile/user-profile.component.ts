@@ -21,7 +21,8 @@ import { AvatarModule } from 'primeng/avatar';
       <!-- Profile header -->
       <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8 flex items-center gap-6">
         <p-avatar
-          [label]="initials()"
+          [image]="firstCat()?.owner?.image_url ?? undefined"
+          [label]="!firstCat()?.owner?.image_url ? initials() : undefined"
           shape="circle"
           size="xlarge"
           styleClass="bg-gray-100 text-gray-700 font-bold text-2xl w-20 h-20 shrink-0"

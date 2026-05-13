@@ -15,8 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
     <main class="min-h-screen flex items-center justify-center p-4 bg-slate-50">
       <div class="w-full max-w-sm">
         <div class="text-center mb-8">
-          <div class="text-5xl mb-3" aria-hidden="true">🐱</div>
-          <h1 class="text-2xl font-bold text-slate-900">Войти в CatPost</h1>
+          <h1 class="text-2xl font-bold text-slate-900">Войти</h1>
           <p class="text-slate-500 mt-1 text-sm">Введите свои данные для входа</p>
         </div>
 
@@ -123,9 +122,7 @@ export class LoginComponent {
       },
       error: (err: unknown) => {
         this.loading.set(false);
-        const msg =
-          (err as { error?: { error?: { message?: string } } })?.error?.error?.message ??
-          'Неверный email или пароль';
+        const msg = 'Неверный email или пароль';
         this.errorMessage.set(msg);
       },
     });

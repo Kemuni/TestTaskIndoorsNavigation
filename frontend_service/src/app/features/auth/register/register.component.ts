@@ -8,7 +8,7 @@ import { MessageModule } from 'primeng/message';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { UsersService } from '../../../core/services/users.service';
-import { debounceTime, distinctUntilChanged, map, Observable, switchMap } from 'rxjs';
+import { map, Observable, switchMap, timer } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -18,8 +18,7 @@ import { debounceTime, distinctUntilChanged, map, Observable, switchMap } from '
     <main class="min-h-screen flex items-center justify-center p-4 bg-slate-50">
       <div class="w-full max-w-sm">
         <div class="text-center mb-8">
-          <div class="text-5xl mb-3" aria-hidden="true">🐱</div>
-          <h1 class="text-2xl font-bold text-slate-900">Регистрация в CatPost</h1>
+          <h1 class="text-2xl font-bold text-slate-900">Регистрация</h1>
           <p class="text-slate-500 mt-1 text-sm">Создайте аккаунт, чтобы добавлять объявления</p>
         </div>
 
@@ -151,10 +150,8 @@ export class RegisterComponent {
 
   private emailTakenValidator(): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      return control.valueChanges.pipe(
-        debounceTime(500),
-        distinctUntilChanged(),
-        switchMap((value: string) => this.usersService.checkEmailFree(value)),
+      return timer(500).pipe(
+        switchMap(() => this.usersService.checkEmailFree(control.value as string)),
         map((res) => (res.data.is_free ? null : { emailTaken: true })),
       );
     };

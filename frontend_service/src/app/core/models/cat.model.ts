@@ -16,6 +16,7 @@ export interface CatOwner {
   email: string;
   first_name: string;
   last_name: string;
+  image_url: string | null;
 }
 
 export interface ShortCat {
@@ -26,6 +27,7 @@ export interface ShortCat {
   age: number;
   age_months: number;
   breed: Breed;
+  main_image: string | null;
 }
 
 export interface CatRead {
@@ -37,7 +39,7 @@ export interface CatRead {
   color: string;
   breed: Breed;
   current_weight: number;
-  birth_weight: number;
+  birth_weight: number | null;
   is_sterilized: boolean;
   description: string | null;
   mother: ShortCat | null;
@@ -59,7 +61,7 @@ export interface CatWrite {
   color: string;
   breed_id: number;
   current_weight: number;
-  birth_weight: number;
+  birth_weight: number | null;
   is_sterilized: boolean;
   description: string | null;
   mother_id: number | null;

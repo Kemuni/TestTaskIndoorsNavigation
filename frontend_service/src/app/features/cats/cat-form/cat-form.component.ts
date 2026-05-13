@@ -20,7 +20,6 @@ import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TextareaModule } from 'primeng/textarea';
 import { MessageModule } from 'primeng/message';
-import { ImageGalleryComponent } from '../../../shared/components/image-gallery/image-gallery.component';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 
@@ -64,7 +63,6 @@ function birthWeightLessThanCurrent(group: AbstractControl): ValidationErrors | 
     CheckboxModule,
     TextareaModule,
     MessageModule,
-    ImageGalleryComponent,
     ToastModule,
   ],
   providers: [MessageService],
@@ -123,7 +121,7 @@ export class CatFormComponent implements OnInit {
     color: ['', [Validators.required, Validators.maxLength(100)]],
     breed_id: [null as unknown as number, Validators.required],
     current_weight: [null as unknown as number, [Validators.required, Validators.min(0.01), Validators.max(30)]],
-    birth_weight: [null as unknown as number, [Validators.required, Validators.min(0.01), Validators.max(10)]],
+    birth_weight: [null as number | null, [Validators.min(0.01), Validators.max(10)]],
     is_sterilized: [false],
     description: [null as string | null],
     mother_id: [null as number | null],
@@ -208,6 +206,7 @@ export class CatFormComponent implements OnInit {
         } else {
           this.router.navigate(['/cats', res.data.id]);
         }
+
       },
       error: (err: unknown) => {
         this.loading.set(false);

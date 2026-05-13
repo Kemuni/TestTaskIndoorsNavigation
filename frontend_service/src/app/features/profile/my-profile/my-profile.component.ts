@@ -251,6 +251,7 @@ export class MyProfileComponent implements OnInit {
       next: (res) => {
         this.editLoading.set(false);
         this.profileUser.set(res.data);
+        this.authService.updateCurrentUser(res.data);
         this.messageService.add({ severity: 'success', summary: 'Сохранено', detail: 'Профиль обновлён' });
       },
       error: (err: unknown) => {
@@ -273,6 +274,7 @@ export class MyProfileComponent implements OnInit {
       next: (res) => {
         this.photoUploading.set(false);
         this.profileUser.update((u) => u ? { ...u, image_url: res.data.image_url } : u);
+        this.authService.updateCurrentUser({ ...this.authService.currentUser()!, image_url: res.data.image_url });
         this.messageService.add({ severity: 'success', summary: 'Готово', detail: 'Фото профиля обновлено' });
         input.value = '';
       },
@@ -289,6 +291,7 @@ export class MyProfileComponent implements OnInit {
       next: () => {
         this.photoUploading.set(false);
         this.profileUser.update((u) => u ? { ...u, image_url: null } : u);
+        this.authService.updateCurrentUser({ ...this.authService.currentUser()!, image_url: null });
         this.messageService.add({ severity: 'success', summary: 'Готово', detail: 'Фото профиля удалено' });
       },
       error: () => {

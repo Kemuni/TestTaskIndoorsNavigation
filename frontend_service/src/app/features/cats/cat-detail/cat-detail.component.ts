@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   OnInit,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ImageGalleryComponent } from '../../../shared/components/image-gallery/image-gallery.component';
 import { CatsService } from '../../../core/services/cats.service';
@@ -38,6 +40,7 @@ import { ToastModule } from 'primeng/toast';
 export class CatDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly catsService = inject(CatsService);
   private readonly authService = inject(AuthService);
   private readonly favouritesService = inject(FavouritesService);
@@ -77,12 +80,15 @@ export class CatDetailComponent implements OnInit {
   readonly ageLabel = computed(() => {
     const cat = this.cat();
     if (!cat) return '';
-    const months = cat.age_months;
-    if (months < 12) return `${months} мес.`;
-    const years = Math.floor(months / 12);
-    const rem = months % 12;
-    return rem ? `${years} г. ${rem} мес.` : `${years} г.`;
+    return this.getAgeLabel(cat.age_months);
   });
+
+  getAgeLabel(ageMonths: number): string {
+    if (ageMonths < 12) return `${ageMonths} мес.`;
+    const years = Math.floor(ageMonths / 12);
+    const rem = ageMonths % 12;
+    return rem ? `${years} г. ${rem} мес.` : `${years} г.`;
+  }
 
   formatBirthday(dateStr: string): string {
     return new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(dateStr));
@@ -93,7 +99,19 @@ export class CatDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.catsService.getCat(this.catId).subscribe({
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        this.loadCat(Number(params.get('id')));
+      });
+  }
+
+  private loadCat(id: number): void {
+    this.loading.set(true);
+    this.error.set(false);
+    this.cat.set(null);
+    this.favouriteId.set(null);
+    this.catsService.getCat(id).subscribe({
       next: (res) => {
         this.cat.set(res.data);
         this.loading.set(false);
@@ -210,8 +228,6 @@ export class CatDetailComponent implements OnInit {
   }
 
   reload(): void {
-    this.loading.set(true);
-    this.error.set(false);
-    this.ngOnInit();
+    this.loadCat(this.catId);
   }
 }

@@ -47,7 +47,6 @@ import { BadgeModule } from 'primeng/badge';
         </div>
       } @else if (dialogs().length === 0) {
         <div class="text-center py-20 text-slate-400">
-          <div class="text-5xl mb-3" aria-hidden="true">💬</div>
           <p class="font-medium">У вас пока нет диалогов</p>
           <p class="text-sm mt-1">
             Найдите объявление и свяжитесь с продавцом

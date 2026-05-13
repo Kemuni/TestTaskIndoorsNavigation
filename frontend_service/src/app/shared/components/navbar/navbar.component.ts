@@ -79,11 +79,18 @@ import { MenuItem } from 'primeng/api';
               [attr.aria-label]="'Меню пользователя ' + currentUser()?.first_name"
               aria-haspopup="true"
             >
-              <p-avatar
-                [label]="userInitials()"
-                shape="circle"
-                styleClass="bg-gray-100 text-gray-700 font-semibold text-sm"
+              @if (currentUser()!.image_url) {
+              <img
+                [src]="currentUser()!.image_url"
+                [alt]="currentUser()!.first_name + ' ' + currentUser()!.last_name"
+                class="w-8 h-8 rounded-full object-cover"
+                aria-hidden="true"
               />
+            } @else {
+              <span class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-700 font-semibold text-xs" aria-hidden="true">
+                {{ currentUser()!.first_name[0] }}{{ currentUser()!.last_name[0] }}
+              </span>
+            }
               <span class="hidden sm:block text-sm font-medium">
                 {{ currentUser()?.first_name }}
               </span>
