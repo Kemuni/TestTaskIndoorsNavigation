@@ -28,6 +28,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '0.0.0.0',
+    'backend',
 ]
 
 
@@ -111,6 +112,7 @@ DATABASES = {
 # Настраиваем CORS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
+    "http://backend:8000",
 ]
 
 # Password validation
