@@ -1,5 +1,4 @@
 # Сайт заводчиков котов
-#### Тестовое задание для Индорс Навигейшн
 
 <p align="left">
    <img src="https://img.shields.io/badge/Python_3.13+-14354C?style=for-the-badge&logo=python&logoColor=white"/>
